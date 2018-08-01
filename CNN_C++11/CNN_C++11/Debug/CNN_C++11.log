@@ -1,0 +1,4 @@
+﻿  CNN_C++11.cpp
+c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\loader.h(38): warning C4018: “<”: 有符号/无符号不匹配
+c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\conv1.h(46): warning C4305: “=”: 从“double”到“float”截断
+  CNN_C++11.vcxproj -> C:\Users\17842\Desktop\C++11\CNN_C++11\Debug\CNN_C++11.exe
