@@ -15,13 +15,14 @@ class Loader
 public:
 	Loader();
 	~Loader();
-	static int*** getPicture(string url);
+	static int*** getPicture(string url,int* size);
 	static wstring StringToWString(string &str);
 	static int* getSize(string url);
 private:
+	static int size[2];
 };
 
-int*** Loader::getPicture(string url) {
+int*** Loader::getPicture(string url,int* size) {
 	int ***p = new int **[3];
 	GdiplusStartupInput gdiplusstartupinput;
 	ULONG_PTR gdiplustoken;
@@ -31,6 +32,7 @@ int*** Loader::getPicture(string url) {
 	UINT height = bmp->GetHeight();
 	UINT width = bmp->GetWidth();
 	cout << height << "  " << width << endl;
+	size[0] = height; size[1] = width;
 	//初始化三维数组：1Red；2Green；3Blue；
 	for (int i = 0; i < 3; i++)
 	{
@@ -66,9 +68,9 @@ int* Loader::getSize(string url) {
 	GdiplusStartupInput gdiplusstartupinput;
 	ULONG_PTR gdiplustoken;
 	GdiplusStartup(&gdiplustoken, &gdiplusstartupinput, NULL);
-	Bitmap* bmp = new Bitmap(StringToWString(url).c_str());
-	size[0] = bmp->GetHeight();
-	size[1] = bmp->GetWidth();
+	Bitmap* bmp2 = new Bitmap(StringToWString(url).c_str());
+	size[0] = bmp2->GetHeight();
+	size[1] = bmp2->GetWidth();
 	GdiplusShutdown(gdiplustoken);
 	return size;
 }
