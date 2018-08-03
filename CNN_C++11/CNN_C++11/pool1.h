@@ -14,6 +14,12 @@ public:
 	float cal_unit(float*** input,int k,int x, int y);
 	void setSize(int* size);
 	float*** max_pooling(float*** input);
+	void init_all();
+	void setZero_error();
+	void cal_error(float*** conv2_error, float**** conv2_core);
+	float cal_error_unit(float*** error_tmp, float**** conv2_core, int j, int k, int l);
+
+
 	float*** result;
 	float*** error;
 	int*** position;
@@ -32,14 +38,28 @@ void Pool::setSize(int* size) {
 	this->in_size[1] = size[1];
 	this->r_size[0] = size[0] / 2;
 	this->r_size[1] = size[1] / 2;
+	init_all();
+}
+
+void Pool::setZero_error() {
+	for (int i = 0; i < 9; i++) { for (int j = 0; j < r_size[0]; j++) { for (int k = 0; k < r_size[1]; k++) { error[i][j][k] = 0; } } }
+}
+
+void Pool::init_all() {
+	delete[] result;
+	delete[] error;
+	delete[] position;
 	result = new float**[9];
+	error = new float**[9];
 	position = new int**[9];
 	for (int i = 0; i < 9; i++) {
 		result[i] = new float*[this->r_size[0]];
 		position[i] = new int*[this->r_size[0]];
+		error[i] = new float*[r_size[0]];
 		for (int j = 0; j < r_size[0]; j++) {
 			result[i][j] = new float[this->r_size[1]];
 			position[i][j] = new int[this->r_size[1]];
+			error[i][j] = new float[r_size[1]];
 		}
 	}
 }
@@ -63,4 +83,38 @@ float*** Pool::max_pooling(float*** input) {
 		}
 	}
 	return result;
+}
+
+void Pool::cal_error(float*** conv2_error, float**** conv2_core) {
+	float*** error_tmp = new float**[9];//9层输出。这里为了方便运算逻辑，使用填0操作
+	for (int i = 0; i < 9; i++) {       //池化层到卷积层有“缩水”,需要填0放大回来（边界对于特征提取重要性较低）
+		error_tmp[i] = new float*[r_size[0]];
+		for (int j = 0; j < r_size[0]; j++) {
+			error_tmp[i][j] = new float[r_size[1]];
+			for (int k = 0; k < r_size[1]; k++) {
+				if (j < 3 || k < 3 || j >= r_size[0] - 3 || k >= r_size[1] - 3) { error_tmp[i][j][k] = 0; }
+				else { error_tmp[i][j][k] = conv2_error[i][j - 3][k - 3]; }
+			}
+		}
+	}
+
+	for (int j = 0; j < 9; j++) {
+		for (int k = 0; k < r_size[0]; k++) {
+			for (int l = 0; l < r_size[1]; l++) {
+				error[j][k][l] += cal_error_unit(error_tmp, conv2_core, j, k, l);//
+			}
+		}
+	}
+	delete[] error_tmp;//释放掉临时矩阵
+}
+
+float Pool::cal_error_unit(float*** error_tmp, float**** conv2_core, int j, int k, int l) {
+	float sum = 0;
+	for (int i = 0; i < 27; i++) {
+		for (int x = k; x < k + 7; x++) {
+			for (int y = l; y < l + 7; y++) {
+				sum += error_tmp[j][k][l] * conv2_core[i][j][7 + k - x][7 + l - y];//卷积，矩阵转置
+			}
+		}
+	}
 }

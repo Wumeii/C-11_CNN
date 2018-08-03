@@ -7,16 +7,23 @@
 #include <stdexcept>
 #include <limits>
 
-class Pool3 //日后通过构造函数设置参数来生成不同的池化层
+class Pool3 //为保证FC1权重维数不变，该池化层较特殊
 {
 public:
 	Pool3();
-	float cal_unit(float*** input, int k, int x, int y);
+	void cal_unit(float*** input, int i, int j, int k, int l, int p);
 	void setSize(int* size);
-	float*** max_pooling(float*** input);
-	float*** result;
-	float*** error;
-	int*** position;
+	float* FC1_pooling(float*** input);
+	void cal_error(float* f1_error, float** f1_weights);
+
+	void init_error();
+	void init_result();
+	void init_all();
+
+
+	float* result;
+	float* error;
+	int** position;
 	int r_size[2];
 	int in_size[2];
 private:
@@ -27,40 +34,78 @@ Pool3::Pool3() {
 	//do something
 }
 
+void Pool3::init_all() {//为了保证FC1的权重维数不变，这里采用空间金字塔池化。1*1+2*2+3*3=14
+	delete[] result;
+	delete[] position;
+	delete[] error;
+	result = new float[81*14];//27*可用变量代替
+	position = new int*[81*14];
+	error = new float[81*14];
+	for (int i = 0; i < 81*14; i++) {
+		position[i] = new int[2];
+	}
+}
+
 void Pool3::setSize(int* size) {
 	this->in_size[0] = size[0];
 	this->in_size[1] = size[1];
 	this->r_size[0] = size[0] / 2;
 	this->r_size[1] = size[1] / 2;
-	result = new float**[81];//27*可用变量代替
-	position = new int**[81];
-	for (int i = 0; i < 81; i++) {
-		result[i] = new float*[this->r_size[0]];
-		position[i] = new int*[this->r_size[0]];
-		for (int j = 0; j < r_size[0]; j++) {
-			result[i][j] = new float[this->r_size[1]];
-			position[i][j] = new int[this->r_size[1]];
-		}
-	}
+	init_all();
 }
 
-float Pool3::cal_unit(float*** input, int k, int x, int y) {
-	float m1, m2; int p1, p2;
-	if (input[k][2 * x][2 * y] > input[k][2 * x][2 * y + 1]) { m1 = input[k][2 * x][2 * y]; p1 = 1; }
-	else { m1 = input[k][2 * x][2 * y + 1]; p1 = 2; }
-	if (input[k][2 * x + 1][2 * y] > input[k][2 * x + 1][2 * y + 1]) { m2 = input[k][2 * x + 1][2 * y]; p2 = 3; }
-	else { m2 = input[k][2 * x + 1][2 * y + 1]; p2 = 4; }
-	if (m1 > m2) { this->position[k][x][y] = p1; return m1; }
-	else { this->position[k][x][y] = p2; return m2; }
-}
-
-float*** Pool3::max_pooling(float*** input) {
-	for (int k = 0; k < 81; k++) {
-		for (int i = 0; i < r_size[0]; i++) {
-			for (int j = 0; j < r_size[1]; j++) {
-				result[k][i][j] = cal_unit(input, k, i, j);
+void Pool3::cal_unit(float*** input, int i, int j, int k, int l, int p) {//n指定第几层；ij指定起始位置;p指定position的更新位置
+	float max;
+	for (int n = 0; n < 81; n++) {
+		max = 0;
+		for (int x = i; x < k; x++) {
+			for (int y = j; y < l; y++) {
+				if (input[n][x][y] > max) {
+					max = input[n][x][y];
+					position[p * 81 + n][0] = x;
+					position[p * 81 + n][1] = y;
+				}
 			}
 		}
+		result[p * 81 + n] = max;
 	}
+}
+
+float* Pool3::FC1_pooling(float*** input) {//不想写for循环了···
+	int k, l;
+	cal_unit(input, 0, 0, in_size[0], in_size[1], 0);
+	k = in_size[0] / 2; l = in_size[1] / 2;
+	cal_unit(input, 0, 0, k, l, 1);
+	cal_unit(input, k, 0, in_size[0], l, 2);
+	cal_unit(input, 0, l, k, in_size[1], 3);
+	cal_unit(input, k, l, in_size[0], in_size[1], 4);
+	k = in_size[0] / 3; l = in_size[1] / 3;
+	cal_unit(input, 0, 0, k, l, 5);
+	cal_unit(input, k, 0, 2*k, l, 6);
+	cal_unit(input, 2*k, 0, in_size[0], l, 7);
+	cal_unit(input, 0, l, k, 2*l, 8);
+	cal_unit(input, k, l, 2*k, 2*l, 9);
+	cal_unit(input, 2*k, l, in_size[0], 2*l, 10);
+	cal_unit(input, 0, 2*l, k, in_size[1], 11);
+	cal_unit(input, k, 2*l, 2*k, in_size[1], 12);
+	cal_unit(input, 2*k, 2*l, in_size[0], in_size[1], 13);
 	return result;
+}
+
+void Pool3::init_error() {
+	for (int i = 0; i < 81*14; i++) { error[i] = 0; }
+}
+
+void Pool3::init_result() {
+	for (int i = 0; i < 81*14; i++) { result[i] = 0; }
+}
+
+void Pool3::cal_error(float* f1_error, float** f1_weights) {
+	init_error();
+	for (int i = 0; i < 81 * 14; i++) {
+		for (int j = 0; j < 256; j++) {
+			error[i] += f1_error[j] * f1_weights[j][i];
+		}
+	}
+	
 }

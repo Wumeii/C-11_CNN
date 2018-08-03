@@ -1,9 +1,10 @@
 ﻿  CNN_C++11.cpp
 c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\loader.h(40): warning C4018: “<”: 有符号/无符号不匹配
 c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\conv1.h(40): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\conv2.h(40): warning C4305: “=”: 从“double”到“float”截断
-c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\conv3.h(40): warning C4305: “=”: 从“double”到“float”截断
-c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\fc1.h(51): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\fc2.h(23): warning C4305: “=”: 从“double”到“float”截断
-c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\fc3.h(22): warning C4305: “=”: 从“double”到“float”截断
-  CNN_C++11.vcxproj -> C:\Users\17842\Desktop\C++11\CNN_C++11\Debug\CNN_C++11.exe
+c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\conv2.h(40): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\conv3.h(40): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\fc1.h(44): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\fc2.h(24): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\fc3.h(24): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\cnn_c++11.cpp(66): error C2039: “max_pooling”: 不是“Pool3”的成员
+  c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\pool3.h(11): note: 参见“Pool3”的声明

@@ -17,6 +17,9 @@ public:
 	float** cal_cnn(float*** picture, int n);
 	void setSize(int *size);
 	int* getSize();
+	void init_io();
+	void setZero_error();
+	void cal_error(float*** p2_error,int*** p2_position);
 
 	float cnn_coe[27][9][7][7];//卷积核2 27*9*7*7  想要便于更改的话改为float****
 	float cnn_b[27];//偏置
@@ -37,7 +40,7 @@ void Conv_level2::init_cnn_core() {//初始化27个3*7*7的core
 		for (int j = 0; j < 9; j++) {
 			for (int k = 0; k < 7; k++) {
 				for (int l = 0; l < 7; l++) {
-					cnn_coe[i][j][k][l] = 0.01;
+					cnn_coe[i][j][k][l] = rand() / double(RAND_MAX) - 0.5;
 				}
 			}
 		}
@@ -47,9 +50,7 @@ void Conv_level2::init_cnn_core() {//初始化27个3*7*7的core
 }
 
 float*** Conv_level2::train_cnn(float*** picture, int* size) {//可以使用多线程
-
-	r_size[0] = size[0] - 7 + 1;
-	r_size[1] = size[1] - 7 + 1;
+	setSize(size);
 
 	result = new float**[27];
 	for (int i = 0; i < 27; i++) {
@@ -60,9 +61,7 @@ float*** Conv_level2::train_cnn(float*** picture, int* size) {//可以使用多线程
 	}
 
 	for (int i = 0; i < 27; i++) {
-
 		result[i] = cal_cnn(picture, i);
-		//result_c1[i] = cal_c1(picture,i);
 	}
 	return result;
 }
@@ -93,6 +92,7 @@ float** Conv_level2::cal_cnn(float*** picture, int n) {
 void Conv_level2::setSize(int* size) {
 	this->r_size[0] = size[0] - 7 + 1;
 	this->r_size[1] = size[1] - 7 + 1;
+	init_io();
 }
 
 int* Conv_level2::getSize() {
@@ -102,3 +102,33 @@ int* Conv_level2::getSize() {
 	return re;
 }
 
+void Conv_level2::init_io() {
+	delete[] result;
+	delete[] error;
+	result = new float**[27];
+	error = new float**[27];
+	for (int i = 0; i < 27; i++) {
+		result[i] = new float*[r_size[0]];
+		error[i] = new float*[r_size[0]];
+		for (int j = 0; j < r_size[0]; j++) {
+			result[i][j] = new float[r_size[1]];
+			error[i][j] = new float[r_size[1]];
+		}
+	}
+}
+
+void Conv_level2::setZero_error() {
+	for (int i = 0; i < 27; i++) { for (int j = 0; j < r_size[0]; j++) { for (int k = 0; k < r_size[1]; k++) { error[i][j][k] = 0; } } }
+};
+
+void Conv_level2::cal_error(float*** p2_error, int*** p2_position) {
+	setZero_error();
+	for (int i = 0; i < 27; i++) {
+		for (int j = 0; j < r_size[0] / 2; j++) {
+			for (int k = 0; k < r_size[1] / 2; k++) {
+				if (p2_position[i][j][k] == 1 || p2_position[i][j][k] == 2) { error[i][2 * j][2 * k + p2_position[i][j][k] - 1] = p2_error[i][j][k]; }
+				else { error[i][2 * j+1][2 * k + p2_position[i][j][k] - 3] = p2_error[i][j][k]; }
+			}
+		}
+	}
+}
