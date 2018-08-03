@@ -120,7 +120,8 @@ void Conv_level3::init_io() {
 void Conv_level3::cal_error(float* p3_error, int** p3_position) {
 	setZero_error();
 	for (int i = 0; i < 81 * 14; i++) {
-		error[i % 81][p3_position[i][0]][p3_position[i][1]] += p3_error[i];
+		if (result[i % 81][p3_position[i][0]][p3_position[i][1]] == 0) { error[i % 81][p3_position[i][0]][p3_position[i][1]] = 0; }
+		else { error[i % 81][p3_position[i][0]][p3_position[i][1]] += p3_error[i]; }
 	}
 }
 

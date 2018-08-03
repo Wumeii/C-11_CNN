@@ -21,7 +21,7 @@ FC3::FC3() {
 }
 
 void FC3::init_wei() {
-	for (int i = 0; i < 2; i++) { for (int j = 0; j < 256; j++) { weights[i][j] = rand() / double(RAND_MAX) - 0.5; } }
+	for (int i = 0; i < 2; i++) { for (int j = 0; j < 256; j++) { weights[i][j] = rand() / double(RAND_MAX) -0.25; } }
 }
 
 float* FC3::cal_result(float* input) {

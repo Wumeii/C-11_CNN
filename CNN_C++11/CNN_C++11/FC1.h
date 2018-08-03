@@ -4,36 +4,24 @@
 class FC1 
 {
 public:
-	FC1(int* in_size);
+	FC1();
 	float** weights;
-	int size[2];
 	float* result = new float[256];
 	float* error = new float[256];
 
-	void setSize(int* size);
-	int* getSize();
-	void init_wei(int* in_size);
+	void init_wei();
 	float* cal_result(float* input);
 	float cal_result_core(float* input, int n);
 	void cal_error(float* f2_error,float** f2_weights);
 };
 
 
-FC1::FC1(int* in_size) {
-	init_wei(in_size);
+FC1::FC1() {
+	init_wei();
 }
 
-void FC1::setSize(int* size) {
-	this->size[0] = size[0];
-	this->size[1] = size[1];
-}
+void FC1::init_wei() {//¸Ä½øºósize¹Ì¶¨¡£Ïê¼ûpool3
 
-int* FC1::getSize() {
-	return this->size;
-}
-
-void FC1::init_wei(int* in_size) {//×¢ÒâÏÈÓÃsetSize¸øsize¸³Öµ£¨¿ÉÒÔ¿¼ÂÇ·ÅÔÚ¹¹Ôìº¯ÊıÖĞ£©
-	setSize(in_size);
 	weights = new float*[256];
 	for (int k = 0; k < 256; k++) {
 		weights[k] = new float[81*14];
@@ -41,10 +29,9 @@ void FC1::init_wei(int* in_size) {//×¢ÒâÏÈÓÃsetSize¸øsize¸³Öµ£¨¿ÉÒÔ¿¼ÂÇ·ÅÔÚ¹¹Ôìº
 
 	for (int k = 0; k < 256; k++) {	
 		for (int i = 0; i < 81*14; i++) {
-			weights[k][i] = rand() / double(RAND_MAX) - 0.5;
+			weights[k][i] = rand() / double(RAND_MAX) -0.25;
 		}
 	}
-	
 }
 
 float* FC1::cal_result(float* input) {
@@ -69,7 +56,9 @@ void FC1::cal_error(float* f2_error, float** f2_weights) {
 	for (int i = 0; i < 256; i++) {
 		sum = 0;
 		if (result[i] == 0) { this->error[i] = 0; }
-		else {for (int j = 0; j < 256; j++) {sum += f2_error[j] * f2_weights[j][i];}
-			this->error[i] = sum;}
+		else {
+			for (int j = 0; j < 256; j++) {sum += f2_error[j] * f2_weights[j][i];}
+			this->error[i] = sum;
+		}
 	}
 }

@@ -21,7 +21,7 @@ FC2::FC2() {
 }
 
 void FC2::init_wei() {
-	for (int i = 0; i < 256; i++) { for (int j = 0; j < 256; j++) { weights[i][j] = rand() / double(RAND_MAX) - 0.5; } }
+	for (int i = 0; i < 256; i++) { for (int j = 0; j < 256; j++) { weights[i][j] = rand() / double(RAND_MAX)-0.25; } }
 }
 
 float* FC2::cal_result(float* input) {

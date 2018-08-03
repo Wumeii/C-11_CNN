@@ -28,7 +28,9 @@ int*** Loader::getPicture(string url,int* size) {
 	ULONG_PTR gdiplustoken;
 	GdiplusStartup(&gdiplustoken, &gdiplusstartupinput, NULL);
 	//wstring infilename(L"1.jpg");
-	Bitmap* bmp = new Bitmap(StringToWString(url).c_str());
+	wstring wstr(url.length(), L' ');
+	copy(url.begin(), url.end(), wstr.begin());
+	Bitmap* bmp = new Bitmap(wstr.c_str());
 	UINT height = bmp->GetHeight();
 	UINT width = bmp->GetWidth();
 	cout << height << "  " << width << endl;

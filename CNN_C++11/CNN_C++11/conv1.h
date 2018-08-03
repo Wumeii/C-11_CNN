@@ -20,9 +20,14 @@ public:
 	void init_io();
 	void setZero_error();
 	void cal_error(float*** p1_error, int*** p1_position);
+	void update_core(int*** picture,float lp);//lp 学习系数
+	float cal_error_core(int*** picture, int i, int j, int k, int l);
+	void cal_updated_core(float lp);
+	void init_error_core();
 
 
-	float cnn_coe[9][3][5][5];//卷积核1 9*3*5*5  想要便于更改的话改为float****
+	float error_core[9][3][5][5];
+	float cnn_core[9][3][5][5];//卷积核1 9*3*5*5  想要便于更改的话改为float****
 	float cnn_b[9];//偏置
 	int r_size[2];//第一层卷积结果维数
 	float ***result;//第一层卷积结果
@@ -41,7 +46,7 @@ void Conv_level::init_cnn_core() {//初始化9个3*5*5的core
 		for (int j = 0; j < 3; j++) {
 			for (int k = 0; k < 5; k++) {
 				for (int l = 0; l < 5; l++) {
-					cnn_coe[i][j][k][l] = rand() / double(RAND_MAX) - 0.5;
+					cnn_core[i][j][k][l] = rand() / double(RAND_MAX) - 0.5;
 				}
 			}
 		}
@@ -52,9 +57,7 @@ void Conv_level::init_cnn_core() {//初始化9个3*5*5的core
 
 float*** Conv_level::train_cnn(int*** picture, int* size) {//可以使用多线程
 
-	r_size[0] = size[0] - 5 + 1;
-	r_size[1] = size[1] - 5 + 1;
-
+	setSize(size);
 	result = new float**[9];
 	for (int i = 0; i < 9; i++) { 
 		result[i] = new float*[r_size[0]];
@@ -81,7 +84,7 @@ float** Conv_level::cal_cnn(int*** picture, int n) {
 			sum = 0;
 			for (int k = i; k < i+5; k++) {
 				for (int l = j; l < j+5; l++) {
-					sum += picture[0][k][l] * cnn_coe[n][0][k-i][l-j] + picture[1][k][l] * cnn_coe[n][1][k-i][l-j] + picture[2][k][l] * cnn_coe[n][2][k-i][l-j];
+					sum += picture[0][k][l] * cnn_core[n][0][k-i][l-j] + picture[1][k][l] * cnn_core[n][1][k-i][l-j] + picture[2][k][l] * cnn_core[n][2][k-i][l-j];
 				}
 			}
 			re[i][j] = sum+cnn_b[n];
@@ -135,3 +138,50 @@ void Conv_level::cal_error(float*** p1_error, int*** p1_position) {
 	}
 }
 
+void Conv_level::update_core(int*** picture,float lp) {
+	init_error_core();
+	for (int i = 0; i < 9; i++) {
+		for (int j = 0; j < 3; j++) {
+			for (int k = 0; k < 5; k++) {
+				for (int l = 0; l < 5; l++) {
+					error_core[i][j][k][l] = cal_error_core(picture,i,j,k,l);
+				}
+			}
+		}
+	}
+	cal_updated_core(lp);
+}
+
+float Conv_level::cal_error_core(int*** picture, int i, int j, int k, int l) {
+	float sum = 0;
+	for (int x = 0; x < r_size[0]; x++) {
+		for (int y = 0; y < r_size[1]; y++) {
+			sum += error[i][x][y] * picture[j][r_size[0] + 4 - k - x][r_size[1] + 4 - l - y];
+		}
+	}
+	return sum;
+}
+
+void Conv_level::cal_updated_core(float lp) {
+	for (int i = 0; i < 9; i++) {
+		for (int j = 0; j < 3; j++) {
+			for (int k = 0; k < 5; k++) {
+				for (int l = 0; l < 5; l++) {
+					cnn_core[i][j][k][l] -= lp * error_core[i][j][k][l];
+				}
+			}
+		}
+	}
+}
+
+void Conv_level::init_error_core() {
+	for (int i = 0; i < 9; i++) {
+		for (int j = 0; j < 3; j++) {
+			for (int k = 0; k < 5; k++) {
+				for (int l = 0; l < 5; l++) {
+					error_core[i][j][k][l] = 0;
+				}
+			}
+		}
+	}
+}
