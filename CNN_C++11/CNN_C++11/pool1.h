@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <limits>
 
-class Pool //ÈÕºóÍ¨¹ı¹¹Ôìº¯ÊıÉèÖÃ²ÎÊıÀ´Éú³É²»Í¬µÄ³Ø»¯²ã
+class Pool //æ—¥åé€šè¿‡æ„é€ å‡½æ•°è®¾ç½®å‚æ•°æ¥ç”Ÿæˆä¸åŒçš„æ± åŒ–å±‚
 {
 public:
 	Pool();
@@ -86,8 +86,8 @@ float*** Pool::max_pooling(float*** input) {
 }
 
 void Pool::cal_error(float*** conv2_error, float**** conv2_core) {
-	float*** error_tmp = new float**[9];//9²ãÊä³ö¡£ÕâÀïÎªÁË·½±ãÔËËãÂß¼­£¬Ê¹ÓÃÌî0²Ù×÷
-	for (int i = 0; i < 9; i++) {       //³Ø»¯²ãµ½¾í»ı²ãÓĞ¡°ËõË®¡±,ĞèÒªÌî0·Å´ó»ØÀ´£¨±ß½ç¶ÔÓÚÌØÕ÷ÌáÈ¡ÖØÒªĞÔ½ÏµÍ£©
+	float*** error_tmp = new float**[9];//9å±‚è¾“å‡ºã€‚è¿™é‡Œä¸ºäº†æ–¹ä¾¿è¿ç®—é€»è¾‘ï¼Œä½¿ç”¨å¡«0æ“ä½œ
+	for (int i = 0; i < 9; i++) {       //æ± åŒ–å±‚åˆ°å·ç§¯å±‚æœ‰â€œç¼©æ°´â€,éœ€è¦å¡«0æ”¾å¤§å›æ¥ï¼ˆè¾¹ç•Œå¯¹äºç‰¹å¾æå–é‡è¦æ€§è¾ƒä½ï¼‰
 		error_tmp[i] = new float*[r_size[0]];
 		for (int j = 0; j < r_size[0]; j++) {
 			error_tmp[i][j] = new float[r_size[1]];
@@ -105,7 +105,7 @@ void Pool::cal_error(float*** conv2_error, float**** conv2_core) {
 			}
 		}
 	}
-	delete[] error_tmp;//ÊÍ·ÅµôÁÙÊ±¾ØÕó
+	delete[] error_tmp;//é‡Šæ”¾æ‰ä¸´æ—¶çŸ©é˜µ
 }
 
 float Pool::cal_error_unit(float*** error_tmp, float**** conv2_core, int j, int k, int l) {
@@ -113,8 +113,9 @@ float Pool::cal_error_unit(float*** error_tmp, float**** conv2_core, int j, int 
 	for (int i = 0; i < 27; i++) {
 		for (int x = k; x < k + 7; x++) {
 			for (int y = l; y < l + 7; y++) {
-				sum += error_tmp[j][k][l] * conv2_core[i][j][7 + k - x][7 + l - y];//¾í»ı£¬¾ØÕó×ªÖÃ
+				sum += error_tmp[j][k][l] * conv2_core[i][j][7 + k - x][7 + l - y];//å·ç§¯ï¼ŒçŸ©é˜µè½¬ç½®
 			}
 		}
 	}
+	return sum;
 }
