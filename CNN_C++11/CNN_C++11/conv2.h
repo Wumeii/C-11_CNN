@@ -6,11 +6,13 @@
 #include <cstdint>
 #include <stdexcept>
 #include <limits>
+#include <fstream>
 
 class Conv_level2//日后尝试通过设置初始参数来创建多个卷积层
 {
 public:
 	Conv_level2();
+	~Conv_level2();
 
 	void init_cnn_core();
 	double*** train_cnn(double*** picture, int* size);
@@ -40,19 +42,51 @@ Conv_level2::Conv_level2() {
 	init_cnn_core();
 }
 
-void Conv_level2::init_cnn_core() {//初始化27个3*7*7的core
-								  //想设计成创建时从现有文件中读取核权重，析构时自动保存
+Conv_level2::~Conv_level2() {
+	fstream save("conv2core.txt", ios::out | ios::trunc);
 	for (int i = 0; i < 27; i++) {//不知道怎么设置初始值，全部置为0.01
 		for (int j = 0; j < 9; j++) {
 			for (int k = 0; k < 7; k++) {
 				for (int l = 0; l < 7; l++) {
-					cnn_core[i][j][k][l] = 0.001*(rand() / double(RAND_MAX) - 0.5);
+					save << cnn_core[i][j][k][l]<<" ";
 				}
 			}
 		}
 	}
-	for (int i = 0; i < 27; i++) { cnn_b[i] = 0.1; }
-	//初始化完成
+	for (int i = 0; i < 27; i++) { save << cnn_b[i]<<" "; }
+	save.close();
+}
+
+void Conv_level2::init_cnn_core() {//初始化27个3*7*7的core
+								  //想设计成创建时从现有文件中读取核权重，析构时自动保存
+	fstream conv2core;
+	conv2core.open("conv2core.txt", ios::in);
+	if (!conv2core) {
+		for (int i = 0; i < 27; i++) {//不知道怎么设置初始值，全部置为0.01
+			for (int j = 0; j < 9; j++) {
+				for (int k = 0; k < 7; k++) {
+					for (int l = 0; l < 7; l++) {
+						cnn_core[i][j][k][l] = 0.01*(rand() / double(RAND_MAX) - 0.3);
+					}
+				}
+			}
+		}
+		for (int i = 0; i < 27; i++) { cnn_b[i] = 0.1; }
+		//初始化完成
+	}
+	else {
+		for (int i = 0; i < 27; i++) {
+			for (int j = 0; j < 9; j++) {
+				for (int k = 0; k < 7; k++) {
+					for (int l = 0; l < 7; l++) {
+						conv2core >> cnn_core[i][j][k][l];
+					}
+				}
+			}
+		}
+		for (int i = 0; i < 27; i++) { conv2core >> cnn_b[i]; }
+	}
+	conv2core.close();
 }
 
 double*** Conv_level2::train_cnn(double*** picture, int* size) {//可以使用多线程
@@ -157,7 +191,7 @@ void Conv_level2::update_core(double*** picture, double lp) {
 }
 
 void Conv_level2::update_b(double lp) {
-	float sum = 0;
+	double sum = 0;
 	for (int i = 0; i < 27; i++) {
 		sum = 0;
 		for (int j = 0; j < r_size[0]; j++) {

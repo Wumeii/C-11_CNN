@@ -6,11 +6,13 @@
 #include <cstdint>
 #include <stdexcept>
 #include <limits>
+#include <fstream>
 
 class Conv_level3//日后尝试通过设置初始参数来创建多个卷积层
 {
 public:
 	Conv_level3();
+	~Conv_level3();
 
 	void init_cnn_core();
 	double*** train_cnn(double*** picture, int* size);
@@ -41,19 +43,50 @@ Conv_level3::Conv_level3() {
 	init_cnn_core();
 }
 
-void Conv_level3::init_cnn_core() {//初始化9个3*7*7的core
-								  //想设计成创建时从现有文件中读取核权重，析构时自动保存
-	for (int i = 0; i < 81; i++) {//不知道怎么设置初始值，全部置为0.01
+Conv_level3::~Conv_level3() {
+	fstream save("conv3core.txt", ios::out | ios::trunc); 
+	for (int i = 0; i < 81; i++) {
 		for (int j = 0; j < 27; j++) {
 			for (int k = 0; k < 7; k++) {
 				for (int l = 0; l < 7; l++) {
-					cnn_core[i][j][k][l] = 0.001*(rand() / double(RAND_MAX) - 0.5);
+					save << cnn_core[i][j][k][l] << " ";
 				}
 			}
 		}
 	}
-	for (int i = 0; i < 81; i++) { cnn_b[i] = 0.1; }
-	//初始化完成
+	for (int i = 0; i < 81; i++) { save << cnn_b[i] << " "; }
+	save.close();
+}
+
+void Conv_level3::init_cnn_core() {//初始化9个3*7*7的core
+	fstream conv3core;
+	conv3core.open("conv3core.txt", ios::in);
+	if (!conv3core) {
+		for (int i = 0; i < 81; i++) {//不知道怎么设置初始值，全部置为0.01
+			for (int j = 0; j < 27; j++) {
+				for (int k = 0; k < 7; k++) {
+					for (int l = 0; l < 7; l++) {
+						cnn_core[i][j][k][l] = 0.01*(rand() / double(RAND_MAX) - 0.3);
+					}
+				}
+			}
+		}
+		for (int i = 0; i < 81; i++) { cnn_b[i] = 0.1; }
+		//初始化完成
+	}
+	else {
+		for (int i = 0; i < 81; i++) {
+			for (int j = 0; j < 27; j++) {
+				for (int k = 0; k < 7; k++) {
+					for (int l = 0; l < 7; l++) {
+						conv3core >> cnn_core[i][j][k][l];
+					}
+				}
+			}
+		}
+		for (int i = 0; i < 81; i++) { conv3core >> cnn_b[i]; }
+	}
+	conv3core.close();
 }
 
 double*** Conv_level3::train_cnn(double*** picture, int* size) {//可以使用多线程
@@ -72,7 +105,7 @@ double*** Conv_level3::train_cnn(double*** picture, int* size) {//可以使用多线程
 double** Conv_level3::cal_cnn(double*** picture, int n) {
 	double** re = new double*[r_size[0]];
 	for (int i = 0; i < r_size[0]; i++) { re[i] = new double[r_size[1]]; }
-	float sum = 0;
+	double sum = 0;
 
 	for (int i = 0; i < r_size[0]; i++) {
 		for (int j = 0; j < r_size[1]; j++) {

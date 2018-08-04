@@ -1,9 +1,10 @@
 #pragma once
-
+#include <fstream>
 
 class FC3 {
 public:
 	FC3();
+	~FC3();
 	double weights[2][256];
 	double b[2];
 	double result[2];
@@ -21,8 +22,32 @@ FC3::FC3() {
 	init_wei();
 }
 
+FC3::~FC3() {
+	fstream save("fc3wei.txt", ios::out | ios::trunc);
+	for (int i = 0; i < 2; i++) {
+		for (int j = 0; j < 256; j++) {
+			save << weights[i][j] << " ";
+		}
+	}
+	save << b[0] << " " << b[1];
+	save.close();
+}
+
 void FC3::init_wei() {
-	for (int i = 0; i < 2; i++) { b[i] = 1; for (int j = 0; j < 256; j++) { weights[i][j] = 0.001*(rand() / double(RAND_MAX) - 0.4); } }
+	fstream fc3wei;
+	fc3wei.open("fc3wei.txt", ios::in);
+	if (!fc3wei) {
+		for (int i = 0; i < 2; i++) { b[i] = 1; for (int j = 0; j < 256; j++) { weights[i][j] = 0.001*(rand() / double(RAND_MAX) - 0.4); } }
+	}
+	else {
+		for (int i = 0; i < 2; i++) {
+			for (int j = 0; j < 256; j++) {
+				fc3wei >> weights[i][j];
+			}
+		}
+		fc3wei >> b[0] >> b[1];
+	}
+	fc3wei.close();
 }
 
 double* FC3::cal_result(double* input) {

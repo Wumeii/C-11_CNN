@@ -55,7 +55,7 @@ void Pool3::setSize(int* size) {
 }
 
 void Pool3::cal_unit(double*** input, int i, int j, int k, int l, int p) {//n指定第几层；ij指定起始位置;p指定position的更新位置
-	float max;
+	double max;
 	for (int n = 0; n < 81; n++) {
 		max = -1;
 		for (int x = i; x < k; x++) {

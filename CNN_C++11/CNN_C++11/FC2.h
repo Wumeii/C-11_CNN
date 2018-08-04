@@ -1,9 +1,10 @@
 #pragma once
-
+#include <fstream>
 
 class FC2 {
 public:
 	FC2();
+	~FC2();
 	double weights[256][256];
 	double b[256];
 	double* result = new double[256];
@@ -22,8 +23,28 @@ FC2::FC2() {
 	init_wei();
 }
 
+FC2::~FC2() {
+	fstream save("fc2wei.txt", ios::out | ios::trunc);
+	for (int i = 0; i < 256; i++) {
+		for (int j = 0; j < 256; j++) { save << weights[i][j] << " "; }
+		for (int i = 0; i < 256; i++) { save << b[i] << " "; }
+	}
+	save.close();
+}
+
 void FC2::init_wei() {
-	for (int i = 0; i < 256; i++) { b[i] = 0.1; for (int j = 0; j < 256; j++) { weights[i][j] = 0.001*(rand() / double(RAND_MAX) - 0.4); } }
+	fstream fc2wei;
+	fc2wei.open("fc2wei.txt", ios::in);
+	if (!fc2wei) {
+		for (int i = 0; i < 256; i++) { b[i] = 0.1; for (int j = 0; j < 256; j++) { weights[i][j] = 0.01*(rand() / double(RAND_MAX) - 0.4); } }
+	}
+	else {
+		for (int i = 0; i < 256; i++) {
+			for (int j = 0; j < 256; j++) { fc2wei >> weights[i][j]; }
+			for (int i = 0; i < 256; i++) { fc2wei >> b[i]; }
+		}
+	}
+	fc2wei.close();
 }
 
 double* FC2::cal_result(double* input) {

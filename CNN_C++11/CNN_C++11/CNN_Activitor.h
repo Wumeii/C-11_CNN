@@ -18,6 +18,7 @@ class CNN_Activitor
 {
 public:
 	CNN_Activitor(double lp);
+	~CNN_Activitor();
 	Conv_level* conv1;
 	Conv_level2* conv2;
 	Conv_level3* conv3;
@@ -35,8 +36,20 @@ public:
 	void Predict(string url);
 	void Train_CNN(string url, double* corr_ans);
 
-
 };
+
+CNN_Activitor::~CNN_Activitor() {
+	delete[] conv1;
+	delete[] conv2;
+	delete[] conv3;
+	delete[] pool1;
+	delete[] pool2;
+	delete[] pool3;
+	delete[] fc1;
+	delete[] fc2;
+	delete[] fc3;
+	cout << "权值已保存" << endl;
+}
 
 CNN_Activitor::CNN_Activitor(double lp)
 {

@@ -1,10 +1,11 @@
 #pragma once
-
+#include <fstream>
 
 class FC1 
 {
 public:
 	FC1();
+	~FC1();
 	double weights[256][81 * 14];
 	double b[256];//偏置
 	//float error_wei[256][81 * 14];
@@ -25,14 +26,37 @@ FC1::FC1() {
 	init_wei();
 }
 
-void FC1::init_wei() {//改进后size固定。详见pool3
-
-	for (int k = 0; k < 256; k++) {	
-		b[k] = 0.1;
-		for (int i = 0; i < 81*14; i++) {
-			weights[k][i] = 0.001*(rand() / double(RAND_MAX) - 0.4);
+FC1::~FC1() {
+	fstream save("fc1wei.txt", ios::out | ios::trunc);
+	for (int k = 0; k < 256; k++) {
+		for (int i = 0; i < 81 * 14; i++) {
+			save << weights[k][i] << " ";
 		}
 	}
+	for (int i = 0; i < 256; i++) { save << b[i] << " "; }
+	save.close();
+}
+
+void FC1::init_wei() {//改进后size固定。详见pool3
+	fstream fc1wei;
+	fc1wei.open("fc1wei.txt", ios::in);
+	if (!fc1wei) {
+		for (int k = 0; k < 256; k++) {
+			for (int i = 0; i < 81 * 14; i++) {
+				weights[k][i] = 0.01*(rand() / double(RAND_MAX) - 0.4);
+			}
+		}
+		for (int i = 0; i < 256; i++) { b[i] = 1; }
+	}
+	else {
+		for (int k = 0; k < 256; k++) {
+			for (int i = 0; i < 81 * 14; i++) {
+				fc1wei >> weights[k][i];
+			}
+		}
+		for (int i = 0; i < 256; i++) { fc1wei >> b[i]; }
+	}
+	fc1wei.close();
 }
 
 double* FC1::cal_result(double* input) {

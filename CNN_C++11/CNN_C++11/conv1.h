@@ -1,17 +1,18 @@
 #pragma once
-#include<iostream>
+#include <stdio.h>
 #include <iostream>
 #include <future>
 #include <thread>
 #include <cstdint>
 #include <stdexcept>
 #include <limits>
+#include <fstream>
 
 class Conv_level//日后尝试通过设置初始参数来创建多个卷积层
 {
 public:
 	Conv_level();
-	
+	~Conv_level();
 	void init_cnn_core();
 	double*** train_cnn(int*** picture, int* size);
 	double** cal_cnn(int*** picture, int n);
@@ -20,15 +21,15 @@ public:
 	void init_io();
 	void setZero_error();
 	void cal_error(double*** p1_error, int*** p1_position);
-	void update_core(int*** picture,float lp);//lp 学习系数
+	void update_core(int*** picture,double lp);//lp 学习系数
 	double cal_error_core(int*** picture, int i, int j, int k, int l);
 	void cal_updated_core(double lp);
 	void init_error_core();
 	void update_b(double lp);
 
 
+    double cnn_core[9][3][5][5];//卷积核1 9*3*5*5  想要便于更改的话改为float****
 	double error_core[9][3][5][5];
-	double cnn_core[9][3][5][5];//卷积核1 9*3*5*5  想要便于更改的话改为float****
 	double cnn_b[9];//偏置
 	int r_size[2];//第一层卷积结果维数
 	double ***result;//第一层卷积结果
@@ -41,19 +42,52 @@ Conv_level::Conv_level() {
 	init_cnn_core();
 }
 
-void Conv_level::init_cnn_core() {//初始化9个3*5*5的core
-	//想设计成创建时从现有文件中读取核权重，析构时自动保存
-	for (int i = 0; i < 9; i++) {//不知道怎么设置初始值，随机创建。
+Conv_level::~Conv_level() {
+	ofstream save("conv1core.txt", ofstream::trunc);
+	for (int i = 0; i < 9; i++) {
 		for (int j = 0; j < 3; j++) {
 			for (int k = 0; k < 5; k++) {
 				for (int l = 0; l < 5; l++) {
-					cnn_core[i][j][k][l] =0.001*( rand() / double(RAND_MAX) - 0.5);
+					save << cnn_core[i][j][k][l] << " ";
 				}
 			}
 		}
 	}
-	for (int i = 0; i < 9; i++) { cnn_b[i] = 0.1; }
-	//初始化完成
+	for (int i = 0; i < 9; i++) { save << cnn_b[i] << " "; }
+	save.close();
+}
+
+void Conv_level::init_cnn_core() {//初始化9个3*5*5的core
+	//想设计成创建时从现有文件中读取核权重，析构时自动保存
+	fstream conv1core;
+	conv1core.open("conv1core.txt",ios::in);
+	if (!conv1core) {
+		for (int i = 0; i < 9; i++) {//不知道怎么设置初始值，随机创建。
+			for (int j = 0; j < 3; j++) {
+				for (int k = 0; k < 5; k++) {
+					for (int l = 0; l < 5; l++) {
+						cnn_core[i][j][k][l] = 0.01*(rand() / double(RAND_MAX) - 0.3);
+					}
+				}
+			}
+		}
+		for (int i = 0; i < 9; i++) { cnn_b[i] = 0.1; }
+		//初始化完成
+	}
+	else {
+		for (int i = 0; i < 9; i++) {
+			for (int j = 0; j < 3; j++) {
+				for (int k = 0; k < 5; k++) {
+					for (int l = 0; l < 5; l++) {
+						conv1core >> cnn_core[i][j][k][l];
+					}
+				}
+			}
+		}
+		for (int i = 0; i < 9; i++) { conv1core >> cnn_b[i]; }
+		//从文件中读入完成
+	}
+	conv1core.close();
 }
 
 double*** Conv_level::train_cnn(int*** picture, int* size) {//可以使用多线程
@@ -140,7 +174,7 @@ void Conv_level::cal_error(double*** p1_error, int*** p1_position) {
 	}
 }
 
-void Conv_level::update_core(int*** picture,float lp) {
+void Conv_level::update_core(int*** picture,double lp) {
 	init_error_core();
 	for (int i = 0; i < 9; i++) {
 		for (int j = 0; j < 3; j++) {
@@ -169,7 +203,7 @@ void Conv_level::update_b(double lp) {
 }
 
 double Conv_level::cal_error_core(int*** picture, int i, int j, int k, int l) {
-	float sum = 0;
+	double sum = 0;
 	for (int x = 0; x < r_size[0]; x++) {
 		for (int y = 0; y < r_size[1]; y++) {
 			sum += error[i][x][y] * picture[j][r_size[0] + 3 - k - x][r_size[1] + 3 - l - y];
