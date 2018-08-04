@@ -5,17 +5,17 @@ class FC1
 {
 public:
 	FC1();
-	float weights[256][81 * 14];
-	float b[256];//偏置
+	double weights[256][81 * 14];
+	double b[256];//偏置
 	//float error_wei[256][81 * 14];
-	float* result = new float[256];
-	float* error = new float[256];
+	double* result = new double[256];
+	double* error = new double[256];
 
 	void init_wei();
-	float* cal_result(float* input);
-	float cal_result_core(float* input, int n);
-	void cal_error(float* f2_error,float** f2_weights);
-	void update_weights(float* p3_result,float lp);
+	double* cal_result(double* input);
+	double cal_result_core(double* input, int n);
+	void cal_error(double* f2_error, double f2_weights[256][256]);
+	void update_weights(double* p3_result, double lp);
 	//void init_error_wei();
 	//float cal_error_wei_unit(float* p3_result, int i, int j);
 };
@@ -30,21 +30,21 @@ void FC1::init_wei() {//改进后size固定。详见pool3
 	for (int k = 0; k < 256; k++) {	
 		b[k] = 0.1;
 		for (int i = 0; i < 81*14; i++) {
-			weights[k][i] = rand() / double(RAND_MAX) -0.4;
+			weights[k][i] = 0.001*(rand() / double(RAND_MAX) - 0.4);
 		}
 	}
 }
 
-float* FC1::cal_result(float* input) {
+double* FC1::cal_result(double* input) {
 	for (int i = 0; i < 256; i++) {
 		result[i] = cal_result_core(input, i);
 	}
 	return result;
 }
 
-float FC1::cal_result_core(float* input, int n)
+double FC1::cal_result_core(double* input, int n)
 {
-	float sum = 0;
+	double sum = 0;
 	for (int i = 0; i < 81 * 14; i++) {
 		sum += input[i] * weights[n][i];
 	}
@@ -53,8 +53,8 @@ float FC1::cal_result_core(float* input, int n)
 	return sum;
 }
 
-void FC1::cal_error(float* f2_error, float** f2_weights) {
-	float sum = 0;
+void FC1::cal_error(double* f2_error, double f2_weights[256][256]) {
+	double sum = 0;
 	for (int i = 0; i < 256; i++) {
 		sum = 0;
 		if (result[i] == 0) { this->error[i] = 0; }
@@ -65,7 +65,7 @@ void FC1::cal_error(float* f2_error, float** f2_weights) {
 	}
 }
 
-void FC1::update_weights(float* p3_result,float lp) {//普通神经网络的更新较简单
+void FC1::update_weights(double* p3_result, double lp) {//普通神经网络的更新较简单
 	for (int i = 0; i < 256; i++) {
 		b[i] -= lp * error[i];
 		for (int j = 0; j < 81 * 14; j++) {

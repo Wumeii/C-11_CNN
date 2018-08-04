@@ -4,16 +4,16 @@
 class FC3 {
 public:
 	FC3();
-	float weights[2][256];
-	float b[2];
-	float result[2];
-	float error[2];
+	double weights[2][256];
+	double b[2];
+	double result[2];
+	double error[2];
 
 	void init_wei();//考虑从文件中恢复
-	float* cal_result(float* input);
-	float cal_result_core(float* input, int n);//方便多线程
-	void cal_error(float* exp);
-	void update_weights(float* fc2_result,float lp);
+	double* cal_result(double* input);
+	double cal_result_core(double* input, int n);//方便多线程
+	void cal_error(double* exp);
+	void update_weights(double* fc2_result, double lp);
 };
 
 
@@ -22,18 +22,18 @@ FC3::FC3() {
 }
 
 void FC3::init_wei() {
-	for (int i = 0; i < 2; i++) { b[i] = 1; for (int j = 0; j < 256; j++) { weights[i][j] = rand() / double(RAND_MAX) - 0.4; } }
+	for (int i = 0; i < 2; i++) { b[i] = 1; for (int j = 0; j < 256; j++) { weights[i][j] = 0.001*(rand() / double(RAND_MAX) - 0.4); } }
 }
 
-float* FC3::cal_result(float* input) {
+double* FC3::cal_result(double* input) {
 	for (int i = 0; i < 2; i++) {
 		result[i] = cal_result_core(input, i);
 	}
 	return result;
 }
 
-float FC3::cal_result_core(float* input, int n) {
-	float sum = 0;
+double FC3::cal_result_core(double* input, int n) {
+	double sum = 0;
 	for (int i = 0; i < 256; i++) {
 		sum += input[i] * weights[n][i];
 	}
@@ -42,7 +42,7 @@ float FC3::cal_result_core(float* input, int n) {
 	return sum;
 }
 
-void FC3::cal_error(float* exp) {//这里计算的都是偏导后的结果，方便后续计算
+void FC3::cal_error(double* exp) {//这里计算的都是偏导后的结果，方便后续计算
 	for (int i = 0; i < 2; i++) {
 		if (result[i] == 0) { error[i] = 0; }
 		else {
@@ -51,7 +51,7 @@ void FC3::cal_error(float* exp) {//这里计算的都是偏导后的结果，方便后续计算
 	}
 }
 
-void FC3::update_weights(float* fc2_result, float lp) {//普通神经网络的更新较简单
+void FC3::update_weights(double* fc2_result, double lp) {//普通神经网络的更新较简单
 	for (int i = 0; i < 2; i++) {
 		b[i] -= lp * error[i];
 		for (int j = 0; j < 256; j++) {

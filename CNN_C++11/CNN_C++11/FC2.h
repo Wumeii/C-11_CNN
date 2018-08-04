@@ -4,18 +4,18 @@
 class FC2 {
 public:
 	FC2();
-	float weights[256][256];
-	float b[256];
-	float* result = new float[256];
-	float* error = new float[256];
+	double weights[256][256];
+	double b[256];
+	double* result = new double[256];
+	double* error = new double[256];
 
 	//void setSize(int* size);SizeÒÑ¾­È·¶¨ÁË£¬256*256.¿ÉÒÔ¿¼ÂÇ¸Ä³É¿É±ä
 	//int* getSize();
 	void init_wei();
-	float* cal_result(float* input);
-	float cal_result_core(float* input, int n);
-	void cal_error(float* f3_error,float** f3_weights);
-	void update_weights(float* fc1_result, float lp);
+	double* cal_result(double* input);
+	double cal_result_core(double* input, int n);
+	void cal_error(double* f3_error, double f3_weights[2][256]);
+	void update_weights(double* fc1_result, double lp);
 };
 
 FC2::FC2() {
@@ -23,18 +23,18 @@ FC2::FC2() {
 }
 
 void FC2::init_wei() {
-	for (int i = 0; i < 256; i++) { b[i] = 0.1; for (int j = 0; j < 256; j++) { weights[i][j] = rand() / double(RAND_MAX) - 0.4; } }
+	for (int i = 0; i < 256; i++) { b[i] = 0.1; for (int j = 0; j < 256; j++) { weights[i][j] = 0.001*(rand() / double(RAND_MAX) - 0.4); } }
 }
 
-float* FC2::cal_result(float* input) {
+double* FC2::cal_result(double* input) {
 	for (int i = 0; i < 256; i++) {
 		result[i] = cal_result_core(input, i);
 	}
 	return result;
 }
 
-float FC2::cal_result_core(float* input, int n) {
-	float sum=0;
+double FC2::cal_result_core(double* input, int n) {
+	double sum=0;
 	for (int i = 0; i < 256; i++) {
 		sum += input[i] * weights[n][i];
 	}
@@ -43,7 +43,7 @@ float FC2::cal_result_core(float* input, int n) {
 	return sum;
 }
 
-void FC2::cal_error(float* f3_error,float** f3_weights) {//Æ«µ¼Êý£¬È±ÉÙ¼¤»îº¯Êýµ¼ÊýºÍÉÏÒ»²ãÊäÈë
+void FC2::cal_error(double* f3_error, double f3_weights[2][256]) {//Æ«µ¼Êý£¬È±ÉÙ¼¤»îº¯Êýµ¼ÊýºÍÉÏÒ»²ãÊäÈë
 	
 	for (int i = 0; i < 256; i++) {
 		if (result[i] == 0) { error[i] = 0; }
@@ -52,7 +52,7 @@ void FC2::cal_error(float* f3_error,float** f3_weights) {//Æ«µ¼Êý£¬È±ÉÙ¼¤»îº¯Êýµ
 	}
 }
 
-void FC2::update_weights(float* fc1_result, float lp) {//ÆÕÍ¨Éñ¾­ÍøÂçµÄ¸üÐÂ½Ï¼òµ¥
+void FC2::update_weights(double* fc1_result, double lp) {//ÆÕÍ¨Éñ¾­ÍøÂçµÄ¸üÐÂ½Ï¼òµ¥
 	for (int i = 0; i < 256; i++) {
 		b[i] -= lp * error[i];
 		for (int j = 0; j < 256; j++) {

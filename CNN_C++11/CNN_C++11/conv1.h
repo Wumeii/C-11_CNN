@@ -13,26 +13,26 @@ public:
 	Conv_level();
 	
 	void init_cnn_core();
-	float*** train_cnn(int*** picture, int* size);
-	float** cal_cnn(int*** picture, int n);
+	double*** train_cnn(int*** picture, int* size);
+	double** cal_cnn(int*** picture, int n);
 	void setSize(int *size);
 	int* getSize();
 	void init_io();
 	void setZero_error();
-	void cal_error(float*** p1_error, int*** p1_position);
+	void cal_error(double*** p1_error, int*** p1_position);
 	void update_core(int*** picture,float lp);//lp 学习系数
-	float cal_error_core(int*** picture, int i, int j, int k, int l);
-	void cal_updated_core(float lp);
+	double cal_error_core(int*** picture, int i, int j, int k, int l);
+	void cal_updated_core(double lp);
 	void init_error_core();
-	void update_b(float lp);
+	void update_b(double lp);
 
 
-	float error_core[9][3][5][5];
-	float cnn_core[9][3][5][5];//卷积核1 9*3*5*5  想要便于更改的话改为float****
-	float cnn_b[9];//偏置
+	double error_core[9][3][5][5];
+	double cnn_core[9][3][5][5];//卷积核1 9*3*5*5  想要便于更改的话改为float****
+	double cnn_b[9];//偏置
 	int r_size[2];//第一层卷积结果维数
-	float ***result;//第一层卷积结果
-	float ***error;//第一层误差（反向传递时用到）
+	double ***result;//第一层卷积结果
+	double ***error;//第一层误差（反向传递时用到）
 private:
 
 };
@@ -47,7 +47,7 @@ void Conv_level::init_cnn_core() {//初始化9个3*5*5的core
 		for (int j = 0; j < 3; j++) {
 			for (int k = 0; k < 5; k++) {
 				for (int l = 0; l < 5; l++) {
-					cnn_core[i][j][k][l] = rand() / double(RAND_MAX) - 0.5;
+					cnn_core[i][j][k][l] =0.001*( rand() / double(RAND_MAX) - 0.5);
 				}
 			}
 		}
@@ -56,14 +56,14 @@ void Conv_level::init_cnn_core() {//初始化9个3*5*5的core
 	//初始化完成
 }
 
-float*** Conv_level::train_cnn(int*** picture, int* size) {//可以使用多线程
+double*** Conv_level::train_cnn(int*** picture, int* size) {//可以使用多线程
 
 	setSize(size);
-	result = new float**[9];
+	result = new double**[9];
 	for (int i = 0; i < 9; i++) { 
-		result[i] = new float*[r_size[0]];
+		result[i] = new double*[r_size[0]];
 		for (int j = 0; j < r_size[0]; j++) {
-			result[i][j] = new float[r_size[1]];
+			result[i][j] = new double[r_size[1]];
 		}
 	}
 
@@ -76,10 +76,10 @@ float*** Conv_level::train_cnn(int*** picture, int* size) {//可以使用多线程
 }
 
 //用于多线程的计算核
-float** Conv_level::cal_cnn(int*** picture, int n) {
-	float** re = new float*[r_size[0]];
-	float sum=0;
-	for (int i = 0; i < r_size[0]; i++) { re[i] = new float[r_size[1]]; }
+double** Conv_level::cal_cnn(int*** picture, int n) {
+	double** re = new double*[r_size[0]];
+	double sum=0;
+	for (int i = 0; i < r_size[0]; i++) { re[i] = new double[r_size[1]]; }
 	for (int i = 0; i < r_size[0]; i++) {
 		for (int j = 0; j < r_size[1]; j++) {
 			sum = 0;
@@ -99,19 +99,20 @@ float** Conv_level::cal_cnn(int*** picture, int n) {
 void Conv_level::setSize(int* size) {
 	this->r_size[0] = size[0] - 5 + 1;
 	this->r_size[1] = size[1] - 5 + 1;
+	init_io();
 }
 
 void Conv_level::init_io() {
 	delete[] result;
 	delete[] error;
-	result = new float**[9];
-	error = new float**[9];
+	result = new double**[9];
+	error = new double**[9];
 	for (int i = 0; i < 9; i++) {
-		result[i] = new float*[r_size[0]];
-		error[i] = new float*[r_size[0]];
+		result[i] = new double*[r_size[0]];
+		error[i] = new double*[r_size[0]];
 		for (int j = 0; j < r_size[0]; j++) {
-			result[i][j] = new float[r_size[1]];
-			error[i][j] = new float[r_size[1]];
+			result[i][j] = new double[r_size[1]];
+			error[i][j] = new double[r_size[1]];
 		}
 	}
 }
@@ -127,7 +128,7 @@ int* Conv_level::getSize() {
 	return re;
 }
 
-void Conv_level::cal_error(float*** p1_error, int*** p1_position) {
+void Conv_level::cal_error(double*** p1_error, int*** p1_position) {
 	setZero_error();
 	for (int i = 0; i < 9; i++) {
 		for (int j = 0; j < r_size[0] / 2; j++) {
@@ -154,8 +155,8 @@ void Conv_level::update_core(int*** picture,float lp) {
 	update_b(lp);
 }
 
-void Conv_level::update_b(float lp) {
-	float sum = 0;
+void Conv_level::update_b(double lp) {
+	double sum = 0;
 	for (int i = 0; i < 9; i++) {
 		sum = 0;
 		for (int j = 0; j < r_size[0]; j++) {
@@ -167,17 +168,17 @@ void Conv_level::update_b(float lp) {
 	}
 }
 
-float Conv_level::cal_error_core(int*** picture, int i, int j, int k, int l) {
+double Conv_level::cal_error_core(int*** picture, int i, int j, int k, int l) {
 	float sum = 0;
 	for (int x = 0; x < r_size[0]; x++) {
 		for (int y = 0; y < r_size[1]; y++) {
-			sum += error[i][x][y] * picture[j][r_size[0] + 4 - k - x][r_size[1] + 4 - l - y];
+			sum += error[i][x][y] * picture[j][r_size[0] + 3 - k - x][r_size[1] + 3 - l - y];
 		}
 	}
 	return sum;
 }
 
-void Conv_level::cal_updated_core(float lp) {
+void Conv_level::cal_updated_core(double lp) {
 	for (int i = 0; i < 9; i++) {
 		for (int j = 0; j < 3; j++) {
 			for (int k = 0; k < 5; k++) {

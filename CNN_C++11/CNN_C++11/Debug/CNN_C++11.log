@@ -1,9 +1,8 @@
 ﻿  CNN_C++11.cpp
 c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\loader.h(42): warning C4018: “<”: 有符号/无符号不匹配
-c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\conv1.h(44): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\conv2.h(43): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\conv3.h(43): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\fc1.h(32): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\fc2.h(24): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\fc3.h(24): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\conv1.h(175): warning C4244: “+=”: 从“double”转换到“float”，可能丢失数据
+c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\conv2.h(165): warning C4244: “+=”: 从“double”转换到“float”，可能丢失数据
+c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\conv3.h(83): warning C4244: “+=”: 从“double”转换到“float”，可能丢失数据
+c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\pool3.h(64): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+c:\users\17842\desktop\c++11\cnn_c++11\cnn_c++11\cnn_activitor.h(93): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
   CNN_C++11.vcxproj -> C:\Users\17842\Desktop\C++11\CNN_C++11\Debug\CNN_C++11.exe
