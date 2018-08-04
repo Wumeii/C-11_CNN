@@ -24,6 +24,7 @@ public:
 	float cal_error_core(int*** picture, int i, int j, int k, int l);
 	void cal_updated_core(float lp);
 	void init_error_core();
+	void update_b(float lp);
 
 
 	float error_core[9][3][5][5];
@@ -51,7 +52,7 @@ void Conv_level::init_cnn_core() {//初始化9个3*5*5的core
 			}
 		}
 	}
-	for (int i = 0; i < 9; i++) { cnn_b[i] = 1; }
+	for (int i = 0; i < 9; i++) { cnn_b[i] = 0.1; }
 	//初始化完成
 }
 
@@ -150,6 +151,20 @@ void Conv_level::update_core(int*** picture,float lp) {
 		}
 	}
 	cal_updated_core(lp);
+	update_b(lp);
+}
+
+void Conv_level::update_b(float lp) {
+	float sum = 0;
+	for (int i = 0; i < 9; i++) {
+		sum = 0;
+		for (int j = 0; j < r_size[0]; j++) {
+			for (int k = 0; k < r_size[1]; k++) {
+				sum += error[i][j][k];
+			}
+		}
+		cnn_b[i] -= lp * sum;
+	}
 }
 
 float Conv_level::cal_error_core(int*** picture, int i, int j, int k, int l) {

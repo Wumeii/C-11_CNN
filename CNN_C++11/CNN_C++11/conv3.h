@@ -21,7 +21,14 @@ public:
 	void setZero_error();
 	void init_io();
 
-	float cnn_coe[81][27][7][7];//卷积核2 81*27*7*7  想要便于更改的话改为float****
+	void update_core(float*** picture, float lp);
+	float cal_error_core(float*** picture, int i, int j, int k, int l);
+	void cal_updated_core(float lp);
+	void init_error_core();
+	void update_b(float lp);
+
+	float cnn_core[81][27][7][7];//卷积核2 81*27*7*7  想要便于更改的话改为float****
+	float error_core[81][27][7][7];
 	float cnn_b[81];//偏置
 	int r_size[2];//第一层卷积结果维数
 	float ***result;//第一层卷积结果
@@ -40,12 +47,12 @@ void Conv_level3::init_cnn_core() {//初始化9个3*7*7的core
 		for (int j = 0; j < 27; j++) {
 			for (int k = 0; k < 7; k++) {
 				for (int l = 0; l < 7; l++) {
-					cnn_coe[i][j][k][l] = rand() / double(RAND_MAX) - 0.5;
+					cnn_core[i][j][k][l] = rand() / double(RAND_MAX) - 0.5;
 				}
 			}
 		}
 	}
-	for (int i = 0; i < 81; i++) { cnn_b[i] = 1; }
+	for (int i = 0; i < 81; i++) { cnn_b[i] = 0.1; }
 	//初始化完成
 }
 
@@ -73,7 +80,7 @@ float** Conv_level3::cal_cnn(float*** picture, int n) {
 			for (int k = i; k < i + 7; k++) {//9、11*可用变量代替
 				for (int l = j; l < j + 7; l++) {
 					for (int m = 0; m < 27; m++) {
-						sum += picture[m][k][l] * cnn_coe[n][m][k - i][l - j];
+						sum += picture[m][k][l] * cnn_core[n][m][k - i][l - j];
 					}
 				}
 			}
@@ -125,3 +132,67 @@ void Conv_level3::cal_error(float* p3_error, int** p3_position) {
 	}
 }
 
+//更新卷积核权重
+void Conv_level3::update_core(float*** picture, float lp) {
+	init_error_core();
+	for (int i = 0; i < 81; i++) {
+		for (int j = 0; j < 27; j++) {
+			for (int k = 0; k < 7; k++) {
+				for (int l = 0; l < 7; l++) {
+					error_core[i][j][k][l] = cal_error_core(picture, i, j, k, l);
+				}
+			}
+		}
+	}
+	cal_updated_core(lp);
+	update_b(lp);
+}
+
+void Conv_level3::update_b(float lp) {
+	float sum = 0;
+	for (int i = 0; i < 81; i++) {
+		sum = 0;
+		for (int j = 0; j < r_size[0]; j++) {
+			for (int k = 0; k < r_size[1]; k++) {
+				sum += error[i][j][k];
+			}
+		}
+		cnn_b[i] -= lp * sum;
+	}
+}
+
+
+
+float Conv_level3::cal_error_core(float*** picture, int i, int j, int k, int l) {
+	float sum = 0;
+	for (int x = 0; x < r_size[0]; x++) {
+		for (int y = 0; y < r_size[1]; y++) {
+			sum += error[i][x][y] * picture[j][r_size[0] + 6 - k - x][r_size[1] + 6 - l - y];
+		}
+	}
+	return sum;
+}
+
+void Conv_level3::cal_updated_core(float lp) {
+	for (int i = 0; i < 81; i++) {
+		for (int j = 0; j < 27; j++) {
+			for (int k = 0; k < 7; k++) {
+				for (int l = 0; l < 7; l++) {
+					cnn_core[i][j][k][l] -= lp * error_core[i][j][k][l];
+				}
+			}
+		}
+	}
+}
+
+void Conv_level3::init_error_core() {
+	for (int i = 0; i < 81; i++) {
+		for (int j = 0; j < 27; j++) {
+			for (int k = 0; k < 7; k++) {
+				for (int l = 0; l < 7; l++) {
+					error_core[i][j][k][l] = 0;
+				}
+			}
+		}
+	}
+}

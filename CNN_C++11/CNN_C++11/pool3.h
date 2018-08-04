@@ -71,6 +71,7 @@ void Pool3::cal_unit(float*** input, int i, int j, int k, int l, int p) {//n指定
 	}
 }
 
+//空间金字塔池化
 float* Pool3::FC1_pooling(float*** input) {//不想写for循环了···
 	int k, l;
 	cal_unit(input, 0, 0, in_size[0], in_size[1], 0);
