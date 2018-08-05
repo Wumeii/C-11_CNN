@@ -62,6 +62,13 @@ ImageLoader::ImageLoader(const char* url, int* result) {
 
 ImageLoader::~ImageLoader() {
   stbi_image_free(this->data);
+
+  for (int i = 0; i < size[2]; i++) {
+    for (int j = 0; j < size[0]; j++) {
+      delete[] arr[i][j];
+    }
+    delete[] arr[i];
+  }
   delete[] arr;
 }
 
