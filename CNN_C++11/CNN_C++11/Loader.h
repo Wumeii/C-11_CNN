@@ -1,4 +1,5 @@
-#pragma once
+ï»¿#pragma once
+
 
 #include <iostream>
 #include <fstream>
@@ -35,7 +36,7 @@ int*** Loader::getPicture(string url,int* size) {
 	UINT width = bmp->GetWidth();
 	cout << height << "  " << width << endl;
 	size[0] = height; size[1] = width;
-	//³õÊ¼»¯ÈýÎ¬Êý×é£º1Red£»2Green£»3Blue£»
+	//åˆå§‹åŒ–ä¸‰ç»´æ•°ç»„ï¼š1Redï¼›2Greenï¼›3Blueï¼›
 	for (int i = 0; i < 3; i++)
 	{
 		p[i] = new int*[height];

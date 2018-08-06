@@ -1,4 +1,6 @@
-#pragma once
+ï»¿#pragma once
+
+
 #include<iostream>
 #include <iostream>
 #include <future>
@@ -7,7 +9,7 @@
 #include <stdexcept>
 #include <limits>
 
-class Pool //ÈÕºóÍ¨¹ı¹¹Ôìº¯ÊıÉèÖÃ²ÎÊıÀ´Éú³É²»Í¬µÄ³Ø»¯²ã
+class Pool //æ—¥åé€šè¿‡æ„é€ å‡½æ•°è®¾ç½®å‚æ•°æ¥ç”Ÿæˆä¸åŒçš„æ± åŒ–å±‚
 {
 public:
 	Pool();
@@ -18,6 +20,7 @@ public:
 	void setZero_error();
 	void cal_error(double*** conv2_error, double conv2_core[27][9][7][7]);
 	double cal_error_unit(double*** error_tmp, double conv2_core[27][9][7][7], int j, int k, int l);
+	void init_error();
 
 
 	double*** result;
@@ -86,8 +89,8 @@ double*** Pool::max_pooling(double*** input) {
 }
 
 void Pool::cal_error(double*** conv2_error, double conv2_core[27][9][7][7]) {
-	double*** error_tmp = new double**[9];//9²ãÊä³ö¡£ÕâÀïÎªÁË·½±ãÔËËãÂß¼­£¬Ê¹ÓÃÌî0²Ù×÷
-	for (int i = 0; i < 9; i++) {       //³Ø»¯²ãµ½¾í»ı²ãÓĞ¡°ËõË®¡±,ĞèÒªÌî0·Å´ó»ØÀ´£¨±ß½ç¶ÔÓÚÌØÕ÷ÌáÈ¡ÖØÒªĞÔ½ÏµÍ£©
+	double*** error_tmp = new double**[27];//27å±‚è¾“å‡ºã€‚è¿™é‡Œä¸ºäº†æ–¹ä¾¿è¿ç®—é€»è¾‘ï¼Œä½¿ç”¨å¡«0æ“ä½œ
+	for (int i = 0; i < 27; i++) {       //æ± åŒ–å±‚åˆ°å·ç§¯å±‚æœ‰â€œç¼©æ°´â€,éœ€è¦å¡«0æ”¾å¤§å›æ¥ï¼ˆè¾¹ç•Œå¯¹äºç‰¹å¾æå–é‡è¦æ€§è¾ƒä½ï¼‰
 		error_tmp[i] = new double*[r_size[0]];
 		for (int j = 0; j < r_size[0]; j++) {
 			error_tmp[i][j] = new double[r_size[1]];
@@ -97,7 +100,7 @@ void Pool::cal_error(double*** conv2_error, double conv2_core[27][9][7][7]) {
 			}
 		}
 	}
-
+	init_error();
 	for (int j = 0; j < 9; j++) {
 		for (int k = 0; k < r_size[0]; k++) {
 			for (int l = 0; l < r_size[1]; l++) {
@@ -105,7 +108,18 @@ void Pool::cal_error(double*** conv2_error, double conv2_core[27][9][7][7]) {
 			}
 		}
 	}
-	delete[] error_tmp;//ÊÍ·ÅµôÁÙÊ±¾ØÕó
+	delete[] error_tmp;//é‡Šæ”¾æ‰ä¸´æ—¶çŸ©é˜µ
+}
+
+void Pool::init_error() {
+	for (int i = 0; i < 9; i++) {
+		for (int j = 0; j < r_size[0]; j++) {
+			for (int k = 0; k < r_size[1]; k++) {
+				error[i][j][k] = 0;
+			}
+		}
+
+	}
 }
 
 double Pool::cal_error_unit(double*** error_tmp, double conv2_core[27][9][7][7], int j, int k, int l) {
@@ -113,7 +127,7 @@ double Pool::cal_error_unit(double*** error_tmp, double conv2_core[27][9][7][7],
 	for (int i = 0; i < 27; i++) {
 		for (int x = k; x < k + 7; x++) {
 			for (int y = l; y < l + 7; y++) {
-				sum += error_tmp[j][k][l] * conv2_core[i][j][7 + k - x][7 + l - y];//¾í»ı£¬¾ØÕó×ªÖÃ
+				sum += error_tmp[j][k][l] * conv2_core[i][j][6 + k - x][6 + l - y];//å·ç§¯ï¼ŒçŸ©é˜µè½¬ç½®
 			}
 		}
 	}

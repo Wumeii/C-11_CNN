@@ -1,4 +1,5 @@
-#pragma once
+ï»¿#pragma once
+
 #include<iostream>
 #include <iostream>
 #include <future>
@@ -7,7 +8,7 @@
 #include <stdexcept>
 #include <limits>
 
-class Pool3 //Îª±£Ö¤FC1È¨ÖØÎ¬Êı²»±ä£¬¸Ã³Ø»¯²ã½ÏÌØÊâ
+class Pool3 //ä¸ºä¿è¯FC1æƒé‡ç»´æ•°ä¸å˜ï¼Œè¯¥æ± åŒ–å±‚è¾ƒç‰¹æ®Š
 {
 public:
 	Pool3();
@@ -34,11 +35,11 @@ Pool3::Pool3() {
 	//do something
 }
 
-void Pool3::init_all() {//ÎªÁË±£Ö¤FC1µÄÈ¨ÖØÎ¬Êı²»±ä£¬ÕâÀï²ÉÓÃ¿Õ¼ä½ğ×ÖËş³Ø»¯¡£1*1+2*2+3*3=14
+void Pool3::init_all() {//ä¸ºäº†ä¿è¯FC1çš„æƒé‡ç»´æ•°ä¸å˜ï¼Œè¿™é‡Œé‡‡ç”¨ç©ºé—´é‡‘å­—å¡”æ± åŒ–ã€‚1*1+2*2+3*3=14
 	delete[] result;
 	delete[] position;
 	delete[] error;
-	result = new double[81*14];//27*¿ÉÓÃ±äÁ¿´úÌæ
+	result = new double[81*14];//27*å¯ç”¨å˜é‡ä»£æ›¿
 	position = new int*[81*14];
 	error = new double[81*14];
 	for (int i = 0; i < 81*14; i++) {
@@ -54,7 +55,7 @@ void Pool3::setSize(int* size) {
 	init_all();
 }
 
-void Pool3::cal_unit(double*** input, int i, int j, int k, int l, int p) {//nÖ¸¶¨µÚ¼¸²ã£»ijÖ¸¶¨ÆğÊ¼Î»ÖÃ;pÖ¸¶¨positionµÄ¸üĞÂÎ»ÖÃ
+void Pool3::cal_unit(double*** input, int i, int j, int k, int l, int p) {//næŒ‡å®šç¬¬å‡ å±‚ï¼›ijæŒ‡å®šèµ·å§‹ä½ç½®;pæŒ‡å®špositionçš„æ›´æ–°ä½ç½®
 	double max;
 	for (int n = 0; n < 81; n++) {
 		max = -1;
@@ -71,8 +72,8 @@ void Pool3::cal_unit(double*** input, int i, int j, int k, int l, int p) {//nÖ¸¶
 	}
 }
 
-//¿Õ¼ä½ğ×ÖËş³Ø»¯
-double* Pool3::FC1_pooling(double*** input) {//²»ÏëĞ´forÑ­»·ÁË¡¤¡¤¡¤
+//ç©ºé—´é‡‘å­—å¡”æ± åŒ–
+double* Pool3::FC1_pooling(double*** input) {//ä¸æƒ³å†™forå¾ªç¯äº†Â·Â·Â·
 	int k, l;
 	cal_unit(input, 0, 0, in_size[0], in_size[1], 0);
 	k = in_size[0] / 2; l = in_size[1] / 2;

@@ -1,4 +1,6 @@
-#pragma once
+ï»¿#pragma once
+
+
 #include <fstream>
 
 class FC1 
@@ -7,7 +9,7 @@ public:
 	FC1();
 	~FC1();
 	double weights[256][81 * 14];
-	double b[256];//Æ«ÖÃ
+	double b[256];//åç½®
 	//float error_wei[256][81 * 14];
 	double* result = new double[256];
 	double* error = new double[256];
@@ -37,7 +39,7 @@ FC1::~FC1() {
 	save.close();
 }
 
-void FC1::init_wei() {//¸Ä½øºósize¹Ì¶¨¡£Ïê¼ûpool3
+void FC1::init_wei() {//æ”¹è¿›åsizeå›ºå®šã€‚è¯¦è§pool3
 	fstream fc1wei;
 	fc1wei.open("fc1wei.txt", ios::in);
 	if (!fc1wei) {
@@ -89,7 +91,7 @@ void FC1::cal_error(double* f2_error, double f2_weights[256][256]) {
 	}
 }
 
-void FC1::update_weights(double* p3_result, double lp) {//ÆÕÍ¨Éñ¾­ÍøÂçµÄ¸üĞÂ½Ï¼òµ¥
+void FC1::update_weights(double* p3_result, double lp) {//æ™®é€šç¥ç»ç½‘ç»œçš„æ›´æ–°è¾ƒç®€å•
 	for (int i = 0; i < 256; i++) {
 		b[i] -= lp * error[i];
 		for (int j = 0; j < 81 * 14; j++) {

@@ -1,4 +1,6 @@
-#pragma once
+ï»¿#pragma once
+
+
 #include <stdio.h>
 #include <iostream>
 #include <future>
@@ -8,7 +10,7 @@
 #include <limits>
 #include <fstream>
 
-class Conv_level//ÈÕºó³¢ÊÔÍ¨¹ıÉèÖÃ³õÊ¼²ÎÊıÀ´´´½¨¶à¸ö¾í»ı²ã
+class Conv_level//æ—¥åå°è¯•é€šè¿‡è®¾ç½®åˆå§‹å‚æ•°æ¥åˆ›å»ºå¤šä¸ªå·ç§¯å±‚
 {
 public:
 	Conv_level();
@@ -21,19 +23,19 @@ public:
 	void init_io();
 	void setZero_error();
 	void cal_error(double*** p1_error, int*** p1_position);
-	void update_core(int*** picture,double lp);//lp Ñ§Ï°ÏµÊı
+	void update_core(int*** picture,double lp);//lp å­¦ä¹ ç³»æ•°
 	double cal_error_core(int*** picture, int i, int j, int k, int l);
 	void cal_updated_core(double lp);
 	void init_error_core();
 	void update_b(double lp);
 
 
-    double cnn_core[9][3][5][5];//¾í»ıºË1 9*3*5*5  ÏëÒª±ãÓÚ¸ü¸ÄµÄ»°¸ÄÎªfloat****
+    double cnn_core[9][3][5][5];//å·ç§¯æ ¸1 9*3*5*5  æƒ³è¦ä¾¿äºæ›´æ”¹çš„è¯æ”¹ä¸ºfloat****
 	double error_core[9][3][5][5];
-	double cnn_b[9];//Æ«ÖÃ
-	int r_size[2];//µÚÒ»²ã¾í»ı½á¹ûÎ¬Êı
-	double ***result;//µÚÒ»²ã¾í»ı½á¹û
-	double ***error;//µÚÒ»²ãÎó²î£¨·´Ïò´«µİÊ±ÓÃµ½£©
+	double cnn_b[9];//åç½®
+	int r_size[2];//ç¬¬ä¸€å±‚å·ç§¯ç»“æœç»´æ•°
+	double ***result;//ç¬¬ä¸€å±‚å·ç§¯ç»“æœ
+	double ***error;//ç¬¬ä¸€å±‚è¯¯å·®ï¼ˆåå‘ä¼ é€’æ—¶ç”¨åˆ°ï¼‰
 private:
 
 };
@@ -55,24 +57,35 @@ Conv_level::~Conv_level() {
 	}
 	for (int i = 0; i < 9; i++) { save << cnn_b[i] << " "; }
 	save.close();
+
+	fstream save2("conv1error.txt", ios::out | ios::trunc);
+	fstream save3("conv1result.txt", ios::out | ios::trunc);
+	for (int i = 0; i < 9; i++) {
+		for (int j = 0; j < r_size[0]; j++) {
+			for (int k = 0; k < r_size[1]; k++) {
+				save2 << error[i][j][k] << " ";
+				save3 << result[i][j][k] << " ";
+			}
+		}
+	}
 }
 
-void Conv_level::init_cnn_core() {//³õÊ¼»¯9¸ö3*5*5µÄcore
-	//ÏëÉè¼Æ³É´´½¨Ê±´ÓÏÖÓĞÎÄ¼şÖĞ¶ÁÈ¡ºËÈ¨ÖØ£¬Îö¹¹Ê±×Ô¶¯±£´æ
+void Conv_level::init_cnn_core() {//åˆå§‹åŒ–9ä¸ª3*5*5çš„core
+	//æƒ³è®¾è®¡æˆåˆ›å»ºæ—¶ä»ç°æœ‰æ–‡ä»¶ä¸­è¯»å–æ ¸æƒé‡ï¼Œææ„æ—¶è‡ªåŠ¨ä¿å­˜
 	fstream conv1core;
 	conv1core.open("conv1core.txt",ios::in);
 	if (!conv1core) {
-		for (int i = 0; i < 9; i++) {//²»ÖªµÀÔõÃ´ÉèÖÃ³õÊ¼Öµ£¬Ëæ»ú´´½¨¡£
+		for (int i = 0; i < 9; i++) {//ä¸çŸ¥é“æ€ä¹ˆè®¾ç½®åˆå§‹å€¼ï¼Œéšæœºåˆ›å»ºã€‚
 			for (int j = 0; j < 3; j++) {
 				for (int k = 0; k < 5; k++) {
 					for (int l = 0; l < 5; l++) {
-						cnn_core[i][j][k][l] = 0.01*(rand() / double(RAND_MAX) - 0.3);
+						cnn_core[i][j][k][l] = 0.01*(rand() / double(RAND_MAX) - 0.2);
 					}
 				}
 			}
 		}
 		for (int i = 0; i < 9; i++) { cnn_b[i] = 0.1; }
-		//³õÊ¼»¯Íê³É
+		//åˆå§‹åŒ–å®Œæˆ
 	}
 	else {
 		for (int i = 0; i < 9; i++) {
@@ -85,12 +98,12 @@ void Conv_level::init_cnn_core() {//³õÊ¼»¯9¸ö3*5*5µÄcore
 			}
 		}
 		for (int i = 0; i < 9; i++) { conv1core >> cnn_b[i]; }
-		//´ÓÎÄ¼şÖĞ¶ÁÈëÍê³É
+		//ä»æ–‡ä»¶ä¸­è¯»å…¥å®Œæˆ
 	}
 	conv1core.close();
 }
 
-double*** Conv_level::train_cnn(int*** picture, int* size) {//¿ÉÒÔÊ¹ÓÃ¶àÏß³Ì
+double*** Conv_level::train_cnn(int*** picture, int* size) {//å¯ä»¥ä½¿ç”¨å¤šçº¿ç¨‹
 
 	setSize(size);
 	result = new double**[9];
@@ -109,7 +122,7 @@ double*** Conv_level::train_cnn(int*** picture, int* size) {//¿ÉÒÔÊ¹ÓÃ¶àÏß³Ì
 	return result;
 }
 
-//ÓÃÓÚ¶àÏß³ÌµÄ¼ÆËãºË
+//ç”¨äºå¤šçº¿ç¨‹çš„è®¡ç®—æ ¸
 double** Conv_level::cal_cnn(int*** picture, int n) {
 	double** re = new double*[r_size[0]];
 	double sum=0;
@@ -123,7 +136,7 @@ double** Conv_level::cal_cnn(int*** picture, int n) {
 				}
 			}
 			re[i][j] = sum+cnn_b[n];
-			//¼¤ÀøRelu
+			//æ¿€åŠ±Relu
 			if (re[i][j] < 0) { re[i][j] = 0; }
 		}
 	}

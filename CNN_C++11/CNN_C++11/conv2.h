@@ -1,4 +1,5 @@
-#pragma once
+ï»¿#pragma once
+
 #include<iostream>
 #include <iostream>
 #include <future>
@@ -8,7 +9,7 @@
 #include <limits>
 #include <fstream>
 
-class Conv_level2//ÈÕºó³¢ÊÔÍ¨¹ıÉèÖÃ³õÊ¼²ÎÊıÀ´´´½¨¶à¸ö¾í»ı²ã
+class Conv_level2//æ—¥åå°è¯•é€šè¿‡è®¾ç½®åˆå§‹å‚æ•°æ¥åˆ›å»ºå¤šä¸ªå·ç§¯å±‚
 {
 public:
 	Conv_level2();
@@ -28,12 +29,12 @@ public:
 	void update_core(double*** picture, double lp);
 	void update_b(double lp);
 
-	double cnn_core[27][9][7][7];//¾í»ıºË2 27*9*7*7  ÏëÒª±ãÓÚ¸ü¸ÄµÄ»°¸ÄÎªfloat****
+	double cnn_core[27][9][7][7];//å·ç§¯æ ¸2 27*9*7*7  æƒ³è¦ä¾¿äºæ›´æ”¹çš„è¯æ”¹ä¸ºfloat****
 	double error_core[27][9][7][7];
-	double cnn_b[27];//Æ«ÖÃ
-	int r_size[2];//µÚÒ»²ã¾í»ı½á¹ûÎ¬Êı
-	double ***result;//µÚÒ»²ã¾í»ı½á¹û
-	double ***error;//µÚÒ»²ãÎó²î£¨·´Ïò´«µİÊ±ÓÃµ½£©
+	double cnn_b[27];//åç½®
+	int r_size[2];//ç¬¬ä¸€å±‚å·ç§¯ç»“æœç»´æ•°
+	double ***result;//ç¬¬ä¸€å±‚å·ç§¯ç»“æœ
+	double ***error;//ç¬¬ä¸€å±‚è¯¯å·®ï¼ˆåå‘ä¼ é€’æ—¶ç”¨åˆ°ï¼‰
 private:
 
 };
@@ -44,7 +45,7 @@ Conv_level2::Conv_level2() {
 
 Conv_level2::~Conv_level2() {
 	fstream save("conv2core.txt", ios::out | ios::trunc);
-	for (int i = 0; i < 27; i++) {//²»ÖªµÀÔõÃ´ÉèÖÃ³õÊ¼Öµ£¬È«²¿ÖÃÎª0.01
+	for (int i = 0; i < 27; i++) {//ä¸çŸ¥é“æ€ä¹ˆè®¾ç½®åˆå§‹å€¼ï¼Œå…¨éƒ¨ç½®ä¸º0.01
 		for (int j = 0; j < 9; j++) {
 			for (int k = 0; k < 7; k++) {
 				for (int l = 0; l < 7; l++) {
@@ -55,24 +56,35 @@ Conv_level2::~Conv_level2() {
 	}
 	for (int i = 0; i < 27; i++) { save << cnn_b[i]<<" "; }
 	save.close();
+
+	fstream save2("conv2error.txt", ios::out | ios::trunc);
+	fstream save3("conv2result.txt", ios::out | ios::trunc);
+	for (int i = 0; i < 27; i++) {
+		for (int j = 0; j < r_size[0]; j++) {
+			for (int k = 0; k < r_size[1]; k++) {
+				save2 << error[i][j][k] << " ";
+				save3 << result[i][j][k] << " ";
+			}
+		}
+	}
 }
 
-void Conv_level2::init_cnn_core() {//³õÊ¼»¯27¸ö3*7*7µÄcore
-								  //ÏëÉè¼Æ³É´´½¨Ê±´ÓÏÖÓĞÎÄ¼şÖĞ¶ÁÈ¡ºËÈ¨ÖØ£¬Îö¹¹Ê±×Ô¶¯±£´æ
+void Conv_level2::init_cnn_core() {//åˆå§‹åŒ–27ä¸ª3*7*7çš„core
+								  //æƒ³è®¾è®¡æˆåˆ›å»ºæ—¶ä»ç°æœ‰æ–‡ä»¶ä¸­è¯»å–æ ¸æƒé‡ï¼Œææ„æ—¶è‡ªåŠ¨ä¿å­˜
 	fstream conv2core;
 	conv2core.open("conv2core.txt", ios::in);
 	if (!conv2core) {
-		for (int i = 0; i < 27; i++) {//²»ÖªµÀÔõÃ´ÉèÖÃ³õÊ¼Öµ£¬È«²¿ÖÃÎª0.01
+		for (int i = 0; i < 27; i++) {//ä¸çŸ¥é“æ€ä¹ˆè®¾ç½®åˆå§‹å€¼ï¼Œå…¨éƒ¨ç½®ä¸º0.01
 			for (int j = 0; j < 9; j++) {
 				for (int k = 0; k < 7; k++) {
 					for (int l = 0; l < 7; l++) {
-						cnn_core[i][j][k][l] = 0.01*(rand() / double(RAND_MAX) - 0.3);
+						cnn_core[i][j][k][l] = 0.01*(rand() / double(RAND_MAX) - 0.2);
 					}
 				}
 			}
 		}
 		for (int i = 0; i < 27; i++) { cnn_b[i] = 0.1; }
-		//³õÊ¼»¯Íê³É
+		//åˆå§‹åŒ–å®Œæˆ
 	}
 	else {
 		for (int i = 0; i < 27; i++) {
@@ -89,7 +101,7 @@ void Conv_level2::init_cnn_core() {//³õÊ¼»¯27¸ö3*7*7µÄcore
 	conv2core.close();
 }
 
-double*** Conv_level2::train_cnn(double*** picture, int* size) {//¿ÉÒÔÊ¹ÓÃ¶àÏß³Ì
+double*** Conv_level2::train_cnn(double*** picture, int* size) {//å¯ä»¥ä½¿ç”¨å¤šçº¿ç¨‹
 	setSize(size);
 
 	result = new double**[27];
@@ -106,7 +118,7 @@ double*** Conv_level2::train_cnn(double*** picture, int* size) {//¿ÉÒÔÊ¹ÓÃ¶àÏß³Ì
 	return result;
 }
 
-//ÓÃÓÚ¶àÏß³ÌµÄ¼ÆËãºË
+//ç”¨äºå¤šçº¿ç¨‹çš„è®¡ç®—æ ¸
 double** Conv_level2::cal_cnn(double*** picture, int n) {
 	double** re = new double*[r_size[0]];
 	double sum = 0;
@@ -114,7 +126,7 @@ double** Conv_level2::cal_cnn(double*** picture, int n) {
 	for (int i = 0; i < r_size[0]; i++) {
 		for (int j = 0; j < r_size[1]; j++) {
 			sum = 0;
-			for (int k = i; k < i + 7; k++) {//9¡¢11*¿ÉÓÃ±äÁ¿´úÌæ
+			for (int k = i; k < i + 7; k++) {//9ã€11*å¯ç”¨å˜é‡ä»£æ›¿
 				for (int l = j; l < j + 7; l++) {
 					for (int m = 0; m < 9; m++) {
 						sum += picture[m][k][l] * cnn_core[n][m][k - i][l - j];
@@ -122,7 +134,7 @@ double** Conv_level2::cal_cnn(double*** picture, int n) {
 				}
 			}
 			re[i][j] = sum + cnn_b[n];
-			//¼¤ÀøRelu
+			//æ¿€åŠ±Relu
 			if (re[i][j] < 0) { re[i][j] = 0; }
 		}
 	}
@@ -174,7 +186,7 @@ void Conv_level2::cal_error(double*** p2_error, int*** p2_position) {
 }
 
 
-//ÓÃÓÚ¸üĞÂ¾í»ıºËÈ¨ÖØ
+//ç”¨äºæ›´æ–°å·ç§¯æ ¸æƒé‡
 void Conv_level2::update_core(double*** picture, double lp) {
 	init_error_core();
 	for (int i = 0; i < 27; i++) {

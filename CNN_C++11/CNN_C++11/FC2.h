@@ -1,4 +1,6 @@
-#pragma once
+ï»¿#pragma once
+
+
 #include <fstream>
 
 class FC2 {
@@ -10,7 +12,7 @@ public:
 	double* result = new double[256];
 	double* error = new double[256];
 
-	//void setSize(int* size);SizeÒÑ¾­È·¶¨ÁË£¬256*256.¿ÉÒÔ¿¼ÂÇ¸Ä³É¿É±ä
+	//void setSize(int* size);Sizeå·²ç»ç¡®å®šäº†ï¼Œ256*256.å¯ä»¥è€ƒè™‘æ”¹æˆå¯å˜
 	//int* getSize();
 	void init_wei();
 	double* cal_result(double* input);
@@ -64,7 +66,7 @@ double FC2::cal_result_core(double* input, int n) {
 	return sum;
 }
 
-void FC2::cal_error(double* f3_error, double f3_weights[2][256]) {//Æ«µ¼Êı£¬È±ÉÙ¼¤»îº¯Êıµ¼ÊıºÍÉÏÒ»²ãÊäÈë
+void FC2::cal_error(double* f3_error, double f3_weights[2][256]) {//åå¯¼æ•°ï¼Œç¼ºå°‘æ¿€æ´»å‡½æ•°å¯¼æ•°å’Œä¸Šä¸€å±‚è¾“å…¥
 	
 	for (int i = 0; i < 256; i++) {
 		if (result[i] == 0) { error[i] = 0; }
@@ -73,7 +75,7 @@ void FC2::cal_error(double* f3_error, double f3_weights[2][256]) {//Æ«µ¼Êı£¬È±ÉÙ
 	}
 }
 
-void FC2::update_weights(double* fc1_result, double lp) {//ÆÕÍ¨Éñ¾­ÍøÂçµÄ¸üĞÂ½Ï¼òµ¥
+void FC2::update_weights(double* fc1_result, double lp) {//æ™®é€šç¥ç»ç½‘ç»œçš„æ›´æ–°è¾ƒç®€å•
 	for (int i = 0; i < 256; i++) {
 		b[i] -= lp * error[i];
 		for (int j = 0; j < 256; j++) {

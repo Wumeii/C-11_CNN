@@ -1,5 +1,6 @@
-#pragma once
-//×Ô´´µÄÀà¿âÖ§³Ö
+ï»¿#pragma once
+
+//è‡ªåˆ›çš„ç±»åº“æ”¯æŒ
 #include "conv1.h"
 #include "conv2.h"
 #include "conv3.h"
@@ -9,7 +10,7 @@
 #include "FC1.h"
 #include "FC2.h"
 #include "FC3.h"
-#include "Loader.h"//¿ÉÒÔÊÓÎª¹¤¾ßÀà
+#include "Loader.h"//å¯ä»¥è§†ä¸ºå·¥å…·ç±»
 
 #include <iostream>
 #include <string>
@@ -19,18 +20,18 @@ class CNN_Activitor
 public:
 	CNN_Activitor(double lp);
 	~CNN_Activitor();
-	Conv_level* conv1;
-	Conv_level2* conv2;
-	Conv_level3* conv3;
-	Pool* pool1;
-	Pool2* pool2;
-	Pool3* pool3;
-	FC1* fc1;
-	FC2* fc2;
-	FC3* fc3;
+	Conv_level* conv1 = nullptr;
+	Conv_level2* conv2 = nullptr;
+	Conv_level3* conv3 = nullptr;
+	Pool* pool1 = nullptr;
+	Pool2* pool2 = nullptr;
+	Pool3* pool3 = nullptr;
+	FC1* fc1 = nullptr;
+	FC2* fc2 = nullptr;
+	FC3* fc3 = nullptr;
 
 	int pic_size[2];
-	int*** picture;//Ôİ´æÍ¼Æ¬£¬¼°Ê±ÇåÀí
+	int*** picture;//æš‚å­˜å›¾ç‰‡ï¼ŒåŠæ—¶æ¸…ç†
 	double learning_point;
 
 	void Predict(string url);
@@ -39,16 +40,16 @@ public:
 };
 
 CNN_Activitor::~CNN_Activitor() {
-	delete[] conv1;
-	delete[] conv2;
-	delete[] conv3;
-	delete[] pool1;
-	delete[] pool2;
-	delete[] pool3;
-	delete[] fc1;
-	delete[] fc2;
-	delete[] fc3;
-	cout << "È¨ÖµÒÑ±£´æ" << endl;
+	delete conv1;
+	delete conv2;
+	delete conv3;
+	delete pool1;
+	delete pool2;
+	delete pool3;
+	delete fc1;
+	delete fc2;
+	delete fc3;
+	cout << "æƒå€¼å·²ä¿å­˜" << endl;
 }
 
 CNN_Activitor::CNN_Activitor(double lp)
@@ -67,9 +68,9 @@ CNN_Activitor::CNN_Activitor(double lp)
 }
 
 void CNN_Activitor::Predict(string url) {
-	picture=Loader::getPicture(url,pic_size);//ÓÃLoader¼ÓÔØÍ¼Æ¬v
+	picture=Loader::getPicture(url,pic_size);//ç”¨LoaderåŠ è½½å›¾ç‰‡v
 
-	conv1->train_cnn(picture, pic_size);//ÓĞ·µ»ØÖµ
+	conv1->train_cnn(picture, pic_size);//æœ‰è¿”å›å€¼
 	pool1->setSize(conv1->getSize());
 	pool1->max_pooling(conv1->result);
 
@@ -84,14 +85,14 @@ void CNN_Activitor::Predict(string url) {
 	fc1->cal_result(pool3->result);
 	fc2->cal_result(fc1->result);
 	fc3->cal_result(fc2->result);
-	cout << "Ô¤²â½á¹ûÎª£º" << endl;
+	cout << "é¢„æµ‹ç»“æœä¸ºï¼š" << endl;
 	cout << fc3->result[0] << "  " << fc3->result[1] << endl;
 	
 }
 
 void CNN_Activitor::Train_CNN(string url, double* corr_ans) {
 	this->Predict(url);
-	//Îó²î´«µİ£º
+	//è¯¯å·®ä¼ é€’ï¼š
 	fc3->cal_error(corr_ans);
 	fc2->cal_error(fc3->error, fc3->weights);
 	fc1->cal_error(fc2->error, fc2->weights);
@@ -101,14 +102,16 @@ void CNN_Activitor::Train_CNN(string url, double* corr_ans) {
 	conv2->cal_error(pool2->error, pool2->position);
 	pool1->cal_error(conv2->error, conv2->cnn_core);
 	conv1->cal_error(pool1->error, pool1->position);
-	cout << "Îó²î´«µİ_Íê³É" << endl;
-	//È¨ÖØ¸üĞÂ£º
+	cout << "è¯¯å·®ä¼ é€’_å®Œæˆ" << endl;
+	//æƒé‡æ›´æ–°ï¼š
 	conv1->update_core(picture,learning_point);
+	cout << conv1->result[5][200][300] << endl;
+	cout << conv2->error[5][200][300] << endl;
 	conv2->update_core(conv1->result,learning_point);
 	conv3->update_core(conv2->result,learning_point);
 	fc1->update_weights(pool3->result, learning_point);
 	fc2->update_weights(fc1->result, learning_point);
 	fc3->update_weights(fc2->result, learning_point);
-	cout << "È¨ÖØ¸üĞÂ_Íê³É" << endl;
+	cout << "æƒé‡æ›´æ–°_å®Œæˆ" << endl;
 	
 };
