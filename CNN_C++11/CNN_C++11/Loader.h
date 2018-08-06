@@ -54,7 +54,7 @@ int*** Loader::getPicture(string url,int* size) {
 			p[2][y][x] = (int)color.GetBlue();
 		}
 	}
-	delete[] bmp;
+	delete bmp;
     GdiplusShutdown(gdiplustoken);
 	cout << url << "  load_Done." << endl;
 	return p;

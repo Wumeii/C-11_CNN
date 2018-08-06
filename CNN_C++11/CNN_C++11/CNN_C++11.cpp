@@ -19,7 +19,6 @@
 
 
 using namespace  std;
-float lreaning_point = 0.5;//学习系数
 int ***picture;
 int pic_size[2];
 
@@ -40,15 +39,10 @@ float* FC3_result;
 
  int main()
 {
-	//初始化，调用各自的构造函数从文件中恢复权值（未完成）
-	 int a;
-	 string url = "1.jpg";
-	 CNN_Activitor cnn(0.5);
-	 ImageLoader loader(url.c_str(),&a);
-	 cout << a << endl;
-	 picture = loader.getPicture();
-	 cout << picture[1][100][100] << endl;
-	 double ans[2] = {5.0,0.0 };
+	//初始化，调用各自的构造函数从文件中恢复权值
+	 CNN_Activitor cnn(0.25);
+
+	 double ans[2] = {1.0,0.0 };
 	 cnn.Train_CNN("1.jpg", ans);
 	 
 	 system("pause");

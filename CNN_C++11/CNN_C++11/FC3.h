@@ -14,7 +14,7 @@ public:
 	void init_wei();//考虑从文件中恢复
 	double* cal_result(double* input);
 	double cal_result_core(double* input, int n);//方便多线程
-	void cal_error(double* exp);
+	void cal_error(double* expect);
 	void update_weights(double* fc2_result, double lp);
 };
 
@@ -38,7 +38,7 @@ void FC3::init_wei() {
 	fstream fc3wei;
 	fc3wei.open("fc3wei.txt", ios::in);
 	if (!fc3wei) {
-		for (int i = 0; i < 2; i++) { b[i] = 1; for (int j = 0; j < 256; j++) { weights[i][j] = 0.001*(rand() / double(RAND_MAX) - 0.4); } }
+		for (int i = 0; i < 2; i++) { b[i] = 1; for (int j = 0; j < 256; j++) { weights[i][j] = 0.01*(rand() / double(RAND_MAX) - 0.4); } }
 	}
 	else {
 		for (int i = 0; i < 2; i++) {
@@ -60,20 +60,24 @@ double* FC3::cal_result(double* input) {
 
 double FC3::cal_result_core(double* input, int n) {
 	double sum = 0;
+	double re = 0;
 	for (int i = 0; i < 256; i++) {
 		sum += input[i] * weights[n][i];
 	}
 	sum += b[n];
-	if (sum < 0) { sum = 0; }
-	return sum;
+	//if (sum < 0) { sum = 0; }这里用ReLu激励调参比较麻烦。尝试采用Sigmod函数
+	re = 1 / (1 + exp(-sum));
+	return re;
 }
 
-void FC3::cal_error(double* exp) {//这里计算的都是偏导后的结果，方便后续计算
+void FC3::cal_error(double* expect) {//这里计算的都是偏导后的结果，方便后续计算
+	double mid = 0;
 	for (int i = 0; i < 2; i++) {
-		if (result[i] == 0) { error[i] = 0; }
-		else {
-			this->error[i] = -(exp[i] - this->result[i]);
-		}
+		//if (result[i] == 0) { error[i] = 0; }
+		//else {
+		mid = 1 / (1 + exp(-1 * result[i]));
+		this->error[i] = -(expect[i] - this->result[i])*mid*(1 - mid);//改为Sigmod激励的输出
+		//}
 	}
 }
 

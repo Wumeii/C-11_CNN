@@ -11,6 +11,7 @@
 #include "FC2.h"
 #include "FC3.h"
 #include "Loader.h"//可以视为工具类
+#include "ImageLoader.h"
 
 #include <iostream>
 #include <string>
@@ -30,7 +31,7 @@ public:
 	FC2* fc2 = nullptr;
 	FC3* fc3 = nullptr;
 
-	int pic_size[2];
+	int* pic_size=new int[2];
 	int*** picture;//暂存图片，及时清理
 	double learning_point;
 
@@ -68,7 +69,11 @@ CNN_Activitor::CNN_Activitor(double lp)
 }
 
 void CNN_Activitor::Predict(string url) {
-	picture=Loader::getPicture(url,pic_size);//用Loader加载图片v
+	//picture=Loader::getPicture(url,pic_size);//用Loader加载图片v
+	int result;
+	ImageLoader* loader = new ImageLoader(url.c_str(), &result);
+	picture = loader->getPicture();
+	pic_size = loader->getSize();
 
 	conv1->train_cnn(picture, pic_size);//有返回值
 	pool1->setSize(conv1->getSize());

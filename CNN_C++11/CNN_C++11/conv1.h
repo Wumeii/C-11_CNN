@@ -79,7 +79,7 @@ void Conv_level::init_cnn_core() {//初始化9个3*5*5的core
 			for (int j = 0; j < 3; j++) {
 				for (int k = 0; k < 5; k++) {
 					for (int l = 0; l < 5; l++) {
-						cnn_core[i][j][k][l] = 0.01*(rand() / double(RAND_MAX) - 0.2);
+						cnn_core[i][j][k][l] = 0.005*(rand() / double(RAND_MAX) - 0.3);
 					}
 				}
 			}

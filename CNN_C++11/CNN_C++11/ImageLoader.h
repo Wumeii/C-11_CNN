@@ -70,6 +70,7 @@ ImageLoader::~ImageLoader() {
 		delete[] arr[i];
 	}
 	delete[] arr;
+	cout << "loader deleted" << endl;
 }
 
 ImageLoader::ImageLoader() = default;
