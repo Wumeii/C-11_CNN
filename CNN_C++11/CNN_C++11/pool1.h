@@ -21,7 +21,7 @@ public:
 	void cal_error(double*** conv2_error, double conv2_core[27][9][7][7]);
 	double cal_error_unit(double*** error_tmp, double conv2_core[27][9][7][7], int j, int k, int l);
 	void init_error();
-
+	void free_();
 
 	double*** result;
 	double*** error;
@@ -49,9 +49,7 @@ void Pool::setZero_error() {
 }
 
 void Pool::init_all() {
-	delete[] result;
-	delete[] error;
-	delete[] position;
+
 	result = new double**[9];
 	error = new double**[9];
 	position = new int**[9];
@@ -108,6 +106,12 @@ void Pool::cal_error(double*** conv2_error, double conv2_core[27][9][7][7]) {
 			}
 		}
 	}
+	for (int i = 0; i < 27; i++) {
+		for (int j = 0; j < r_size[0]; j++) {
+			delete[] error_tmp[i][j];
+		}
+		delete[] error_tmp[i];
+	}
 	delete[] error_tmp;//释放掉临时矩阵
 }
 
@@ -118,7 +122,6 @@ void Pool::init_error() {
 				error[i][j][k] = 0;
 			}
 		}
-
 	}
 }
 
@@ -132,4 +135,20 @@ double Pool::cal_error_unit(double*** error_tmp, double conv2_core[27][9][7][7],
 		}
 	}
 	return sum;
+}
+
+void Pool::free_() {
+	for (int i = 0; i < 9; i++) {
+		for (int j = 0; j < r_size[0]; j++) {
+			delete[] result[i][j];
+			delete[] error[i][j];
+			delete[] position[i][j];
+		}
+		delete[] result[i];
+		delete[] error[i];
+		delete[] position[i];
+	}
+	delete[] error;
+	delete[] result;
+	delete[] position;
 }

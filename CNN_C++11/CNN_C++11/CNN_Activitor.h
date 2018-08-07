@@ -110,13 +110,17 @@ void CNN_Activitor::Train_CNN(string url, double* corr_ans) {
 	cout << "误差传递_完成" << endl;
 	//权重更新：
 	conv1->update_core(picture,learning_point);
-	cout << conv1->result[5][200][300] << endl;
-	cout << conv2->error[5][200][300] << endl;
-	conv2->update_core(conv1->result,learning_point);
-	conv3->update_core(conv2->result,learning_point);
+//	cout << conv1->result[5][200][300] << endl;
+//	cout << conv2->error[5][200][300] << endl;
+	conv2->update_core(pool1->result,learning_point);
+	pool1->free_();//内存管理
+	conv3->update_core(pool2->result,learning_point);
+	pool2->free_();
 	fc1->update_weights(pool3->result, learning_point);
+	pool3->free_();
 	fc2->update_weights(fc1->result, learning_point);
 	fc3->update_weights(fc2->result, learning_point);
 	cout << "权重更新_完成" << endl;
+	delete picture;
 	
 };

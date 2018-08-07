@@ -28,6 +28,7 @@ public:
 	void cal_updated_core(double lp);
 	void init_error_core();
 	void update_b(double lp);
+	void free_();//内存管理
 
 
     double cnn_core[9][3][5][5];//卷积核1 9*3*5*5  想要便于更改的话改为float****
@@ -58,7 +59,7 @@ Conv_level::~Conv_level() {
 	for (int i = 0; i < 9; i++) { save << cnn_b[i] << " "; }
 	save.close();
 
-	fstream save2("conv1error.txt", ios::out | ios::trunc);
+/*	fstream save2("conv1error.txt", ios::out | ios::trunc);
 	fstream save3("conv1result.txt", ios::out | ios::trunc);
 	for (int i = 0; i < 9; i++) {
 		for (int j = 0; j < r_size[0]; j++) {
@@ -67,7 +68,7 @@ Conv_level::~Conv_level() {
 				save3 << result[i][j][k] << " ";
 			}
 		}
-	}
+	}*/
 }
 
 void Conv_level::init_cnn_core() {//初始化9个3*5*5的core
@@ -93,6 +94,7 @@ void Conv_level::init_cnn_core() {//初始化9个3*5*5的core
 				for (int k = 0; k < 5; k++) {
 					for (int l = 0; l < 5; l++) {
 						conv1core >> cnn_core[i][j][k][l];
+
 					}
 				}
 			}
@@ -106,19 +108,14 @@ void Conv_level::init_cnn_core() {//初始化9个3*5*5的core
 double*** Conv_level::train_cnn(int*** picture, int* size) {//可以使用多线程
 
 	setSize(size);
-	result = new double**[9];
-	for (int i = 0; i < 9; i++) { 
-		result[i] = new double*[r_size[0]];
-		for (int j = 0; j < r_size[0]; j++) {
-			result[i][j] = new double[r_size[1]];
-		}
-	}
+	init_io();
 
+	std::future<double**> f1[9]; //多线程
 	for (int i = 0; i < 9; i++) {
-		
-		result[i] = cal_cnn(picture,i);
-		//result_c1[i] = cal_c1(picture,i);
+		//result[i] = cal_cnn(picture,i);
+		f1[i] = std::async(std::launch::async, std::bind(&Conv_level::cal_cnn, this, picture, i));
 	}
+	for (int i = 0; i < 9; i++) { result[i] = f1[i].get(); }
 	return result;
 }
 
@@ -146,23 +143,24 @@ double** Conv_level::cal_cnn(int*** picture, int n) {
 void Conv_level::setSize(int* size) {
 	this->r_size[0] = size[0] - 5 + 1;
 	this->r_size[1] = size[1] - 5 + 1;
-	init_io();
 }
 
 void Conv_level::init_io() {
-	delete[] result;
-	delete[] error;
+
 	result = new double**[9];
 	error = new double**[9];
 	for (int i = 0; i < 9; i++) {
-		result[i] = new double*[r_size[0]];
+		//result[i] = new double*[r_size[0]];
 		error[i] = new double*[r_size[0]];
 		for (int j = 0; j < r_size[0]; j++) {
-			result[i][j] = new double[r_size[1]];
+			//result[i][j] = new double[r_size[1]];
 			error[i][j] = new double[r_size[1]];
 		}
 	}
 }
+
+
+
 
 void Conv_level::setZero_error() {
 	for (int i = 0; i < 9; i++) { for (int j = 0; j < r_size[0]; j++) { for (int k = 0; k < r_size[1]; k++) { error[i][j][k] = 0; } } }
@@ -200,6 +198,20 @@ void Conv_level::update_core(int*** picture,double lp) {
 	}
 	cal_updated_core(lp);
 	update_b(lp);
+	free_();
+}
+
+void Conv_level::free_() {
+	for (int i = 0; i < 9; i++) {
+		for (int j = 0; j < r_size[0]; j++) {
+			delete[] result[i][j];
+			delete[] error[i][j];
+		}
+		delete[] result[i];
+		delete[] error[i];
+	}
+	delete[] error;
+	delete[] result;
 }
 
 void Conv_level::update_b(double lp) {

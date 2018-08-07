@@ -20,6 +20,7 @@ public:
 	void init_error();
 	void init_result();
 	void init_all();
+	void free_();
 
 
 	double* result;
@@ -36,9 +37,6 @@ Pool3::Pool3() {
 }
 
 void Pool3::init_all() {//为了保证FC1的权重维数不变，这里采用空间金字塔池化。1*1+2*2+3*3=14
-	delete[] result;
-	delete[] position;
-	delete[] error;
 	result = new double[81*14];//27*可用变量代替
 	position = new int*[81*14];
 	error = new double[81*14];
@@ -110,4 +108,13 @@ void Pool3::cal_error(double* f1_error, double f1_weights[256][81*14]) {
 		}
 	}
 	
+}
+
+void Pool3::free_() {
+	for (int i = 0; i < 81*14; i++) {
+		delete[] position[i];
+	}
+	delete[] error;
+	delete[] result;
+	delete[] position;
 }

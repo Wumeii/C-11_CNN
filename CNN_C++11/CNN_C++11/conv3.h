@@ -24,7 +24,7 @@ public:
 	void cal_error(double* p3_error,int** p3_position);
 	void setZero_error();
 	void init_io();
-
+	void free_();
 	void update_core(double*** picture, double lp);
 	double cal_error_core(double*** picture, int i, int j, int k, int l);
 	void cal_updated_core(double lp);
@@ -60,7 +60,7 @@ Conv_level3::~Conv_level3() {
 	for (int i = 0; i < 81; i++) { save << cnn_b[i] << " "; }
 	save.close();
 
-	fstream save2("conv3error.txt", ios::out | ios::trunc);
+/*	fstream save2("conv3error.txt", ios::out | ios::trunc);
 	fstream save3("conv3result.txt", ios::out | ios::trunc);
 	for (int i = 0; i < 81; i++) {
 		for (int j = 0; j < r_size[0]; j++) {
@@ -69,7 +69,7 @@ Conv_level3::~Conv_level3() {
 				save3 << result[i][j][k] << " ";
 			}
 		}
-	}
+	}*/
 }
 
 void Conv_level3::init_cnn_core() {//初始化9个3*7*7的core
@@ -104,11 +104,12 @@ void Conv_level3::init_cnn_core() {//初始化9个3*7*7的core
 }
 
 double*** Conv_level3::train_cnn(double*** picture, int* size) {//可以使用多线程
+	
 	setSize(size);
-
+	init_io();
 
 	for (int i = 0; i < 81; i++) {
-
+		
 		result[i] = cal_cnn(picture, i);
 		//result_c1[i] = cal_c1(picture,i);
 	}
@@ -157,15 +158,14 @@ void Conv_level3::setZero_error() {
 };
 
 void Conv_level3::init_io() {
-	delete[] result;
-	delete[] error;
+
 	result = new double**[81];
 	error = new double**[81];
 	for (int i = 0; i < 81; i++) {
-		result[i] = new double*[r_size[0]];
+		//result[i] = new double*[r_size[0]];
 		error[i] = new double*[r_size[0]];
 		for (int j = 0; j < r_size[0]; j++) {
-			result[i][j] = new double[r_size[1]];
+			//result[i][j] = new double[r_size[1]];
 			error[i][j] = new double[r_size[1]];
 		}
 	}
@@ -195,6 +195,20 @@ void Conv_level3::update_core(double*** picture, double lp) {
 	}
 	cal_updated_core(lp);
 	update_b(lp);
+	free_();
+}
+
+void Conv_level3::free_() {
+	for (int i = 0; i < 81; i++) {
+		for (int j = 0; j < r_size[0]; j++) {
+			delete[] result[i][j];
+			delete[] error[i][j];
+		}
+		delete[] result[i];
+		delete[] error[i];
+	}
+	delete[] error;
+	delete[] result;
 }
 
 void Conv_level3::update_b(double lp) {
@@ -216,7 +230,7 @@ double Conv_level3::cal_error_core(double*** picture, int i, int j, int k, int l
 	double sum = 0;
 	for (int x = 0; x < r_size[0]; x++) {
 		for (int y = 0; y < r_size[1]; y++) {
-			sum += error[i][x][y] * picture[j][r_size[0] + 6 - k - x][r_size[1] + 6 - l - y];
+			sum += error[i][x][y] * picture[j][r_size[0] + 5 - k - x][r_size[1] + 5 - l - y];
 		}
 	}
 	return sum;

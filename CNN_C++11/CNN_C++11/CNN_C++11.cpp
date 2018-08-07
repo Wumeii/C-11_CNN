@@ -43,9 +43,13 @@ float* FC3_result;
 	 CNN_Activitor cnn(0.25);
 
 	 double ans[2] = {1.0,0.0 };
-	 cnn.Train_CNN("1.jpg", ans);
-	 
-	 system("pause");
-     return 0;
+
+	for (int i = 0; i < 10; i++) {
+		cnn.Train_CNN("1.jpg", ans);
+	}
+
+
+	system("pause");
+    return 0;
 }
 
